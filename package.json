@@ -15,6 +15,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.2",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@tsconfig/svelte": "^5.0.4",
     "@types/chrome": "^0.0.326",
@@ -38,5 +39,8 @@
       "eslint --fix",
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "openai": "^5.6.0"
   }
 }
