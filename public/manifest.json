@@ -1,0 +1,6 @@
+{
+  "manifest_version": 3,
+  "name": "TrueStar",
+  "version": "0.0.1",
+  "description": "A browser extension for detecting fake reviews on e-commerce platforms."
+}
