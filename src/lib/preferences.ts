@@ -1,49 +1,31 @@
-export interface UserPreferences {
-  errorLogging: {
-    enabled: boolean;
-  };
-}
-
-const DEFAULT_PREFERENCES: UserPreferences = {
-  errorLogging: {
-    enabled: false, // Default to disabled for privacy
-  },
-};
-
 class PreferencesManager {
-  private preferences: UserPreferences = DEFAULT_PREFERENCES;
-  private readonly STORAGE_KEY = 'truestar_preferences';
+  private errorLoggingEnabled: boolean = false; // Default to disabled for privacy
+  private loadPromise: Promise<void>;
 
   constructor() {
-    this.loadPreferences();
+    this.loadPromise = this.loadPreferences();
   }
 
-  private loadPreferences(): void {
-    chrome.storage.local.get(this.STORAGE_KEY, (result) => {
-      if (result[this.STORAGE_KEY]) {
-        this.preferences = {
-          ...DEFAULT_PREFERENCES,
-          ...result[this.STORAGE_KEY],
-        };
-      }
+  private async loadPreferences(): Promise<void> {
+    return new Promise((resolve) => {
+      chrome.storage.local.get('errorLoggingEnabled', (result) => {
+        this.errorLoggingEnabled = result.errorLoggingEnabled ?? false;
+        resolve();
+      });
     });
   }
 
-  private savePreferences(): void {
-    chrome.storage.local.set({ [this.STORAGE_KEY]: this.preferences });
-  }
-
-  getPreferences(): UserPreferences {
-    return { ...this.preferences };
+  async waitForLoad(): Promise<void> {
+    await this.loadPromise;
   }
 
   setErrorLoggingEnabled(enabled: boolean): void {
-    this.preferences.errorLogging.enabled = enabled;
-    this.savePreferences();
+    this.errorLoggingEnabled = enabled;
+    chrome.storage.local.set({ errorLoggingEnabled: enabled });
   }
 
   isErrorLoggingEnabled(): boolean {
-    return this.preferences.errorLogging.enabled;
+    return this.errorLoggingEnabled;
   }
 }
 
