@@ -1,3 +1,5 @@
+import { log } from '../lib/logger';
+
 // TODO: Use shared types with backend
 interface ReviewData {
   rating: number;
@@ -42,7 +44,7 @@ class TrueStarApi {
       const backendResponse = await response.json();
       return backendResponse.result;
     } catch (error) {
-      console.error('Backend API error:', error);
+      log.error('Backend API error:', error);
 
       // Return fallback result
       return {
