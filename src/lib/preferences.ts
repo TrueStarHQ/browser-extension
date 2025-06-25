@@ -1,17 +1,57 @@
 class PreferencesManager {
-  private errorLoggingEnabled: boolean = false; // Default to disabled for privacy
   private loadPromise: Promise<void>;
+  private changeListeners: Set<
+    (changes: Partial<typeof this.preferences>) => void
+  > = new Set();
+
+  // Single source of truth for preferences and their defaults
+  private preferences = {
+    errorLoggingEnabled: false, // Default to disabled for privacy
+  };
 
   constructor() {
     this.loadPromise = this.loadPreferences();
+    this.setupStorageListener();
   }
 
   private async loadPreferences(): Promise<void> {
     return new Promise((resolve) => {
-      chrome.storage.local.get('errorLoggingEnabled', (result) => {
-        this.errorLoggingEnabled = result.errorLoggingEnabled ?? false;
+      const keys = Object.keys(this.preferences) as Array<
+        keyof typeof this.preferences
+      >;
+      chrome.storage.local.get(keys, (result) => {
+        // Update preferences with stored values or keep defaults
+        for (const key of keys) {
+          if (result[key] !== undefined) {
+            this.preferences[key] = result[key];
+          }
+        }
         resolve();
       });
+    });
+  }
+
+  private setupStorageListener(): void {
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName !== 'local') return;
+
+      const relevantChanges: Partial<typeof this.preferences> = {};
+
+      // Handle all preference changes generically
+      for (const [key, change] of Object.entries(changes)) {
+        if (key in this.preferences) {
+          const prefKey = key as keyof typeof this.preferences;
+          const newValue = change.newValue ?? this.preferences[prefKey];
+
+          // Update the preference
+          this.preferences[prefKey] = newValue;
+          relevantChanges[prefKey] = newValue;
+        }
+      }
+
+      if (Object.keys(relevantChanges).length > 0) {
+        this.changeListeners.forEach((listener) => listener(relevantChanges));
+      }
     });
   }
 
@@ -20,12 +60,31 @@ class PreferencesManager {
   }
 
   setErrorLoggingEnabled(enabled: boolean): void {
-    this.errorLoggingEnabled = enabled;
-    chrome.storage.local.set({ errorLoggingEnabled: enabled });
+    this.setPreference('errorLoggingEnabled', enabled);
+  }
+
+  private setPreference<K extends keyof typeof this.preferences>(
+    key: K,
+    value: (typeof this.preferences)[K]
+  ): void {
+    this.preferences[key] = value;
+    chrome.storage.local.set({ [key]: value });
   }
 
   isErrorLoggingEnabled(): boolean {
-    return this.errorLoggingEnabled;
+    return this.preferences.errorLoggingEnabled;
+  }
+
+  onPreferencesChanged(
+    listener: (changes: Partial<typeof this.preferences>) => void
+  ): void {
+    this.changeListeners.add(listener);
+  }
+
+  removePreferencesChangedListener(
+    listener: (changes: Partial<typeof this.preferences>) => void
+  ): void {
+    this.changeListeners.delete(listener);
   }
 }
 
