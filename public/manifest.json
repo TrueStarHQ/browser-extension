@@ -21,8 +21,13 @@
     }
   ],
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "TrueStar Settings"
+  },
   "host_permissions": [
     "https://api.truestar.pro/check/*",
     "http://localhost:*/check/*"
