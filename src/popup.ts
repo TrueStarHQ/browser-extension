@@ -1,7 +1,7 @@
 import { mount } from 'svelte';
-import PopupContent from './PopupContent.svelte';
+import Popup from './Popup.svelte';
 
-const app = mount(PopupContent, {
+const app = mount(Popup, {
   target: document.getElementById('popup-content')!,
 });
 
