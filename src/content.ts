@@ -1,27 +1,8 @@
-import OpenAI from 'openai';
-import { PromptBuilders } from './prompts/index';
+import { truestarApi } from './services/truestar-api';
+import type { ReviewData } from './services/truestar-api';
 
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
-
-interface ReviewData {
-  rating: number;
-  text: string;
-  author: string;
-  verified: boolean;
-}
-
-class TrueStarAnalyzer {
-  private apiKey: string;
-
+class AmazonProductPageChecker {
   constructor() {
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (!this.apiKey) {
-      console.error('TrueStar: OpenAI API key not found');
-      return;
-    }
     this.init();
   }
 
@@ -81,40 +62,15 @@ class TrueStarAnalyzer {
 
       console.log(`TrueStar: Found ${reviews.length} reviews, analyzing...`);
 
-      const analysisResult = await this.callOpenAI(reviews);
-      this.displayResults(analysisResult);
+      const result = await this.checkReviews(reviews);
+      this.displayResults(result);
     } catch (error) {
       console.error('TrueStar: Error analyzing reviews:', error);
     }
   }
 
-  private async callOpenAI(reviews: ReviewData[]): Promise<any> {
-    const prompt = PromptBuilders.batchReviewPrompt(reviews);
-
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.1,
-      max_tokens: 500,
-    });
-
-    const content = response.choices[0]?.message?.content;
-    if (!content) throw new Error('No response from OpenAI');
-
-    try {
-      // Extract JSON from markdown code blocks if present
-      const jsonMatch = content.match(/```json\s*\n([\s\S]*?)\n```/);
-      const cleanContent = jsonMatch ? jsonMatch[1] : content;
-      return JSON.parse(cleanContent.trim());
-    } catch {
-      console.error('TrueStar: Failed to parse OpenAI response:', content);
-      return {
-        overall_fake_score: 0,
-        confidence: 0,
-        red_flags: ['Analysis failed'],
-        summary: 'Unable to analyze reviews',
-      };
-    }
+  private async checkReviews(reviews: ReviewData[]): Promise<any> {
+    return await truestarApi.analyzeReviews(reviews);
   }
 
   private displayResults(analysis: any) {
@@ -140,9 +96,13 @@ class TrueStarAnalyzer {
       font-size: 14px;
     `;
 
-    const fakeScore = analysis.overall_fake_score || 0;
+    const fakeScore = analysis.isFake
+      ? Math.round(analysis.confidence * 100)
+      : Math.round((1 - analysis.confidence) * 100);
     const color =
       fakeScore > 70 ? '#d13212' : fakeScore > 40 ? '#ff9900' : '#067d62';
+
+    const allRedFlags = [...analysis.reasons, ...analysis.flags];
 
     panel.innerHTML = `
       <div style="display: flex; align-items: center; margin-bottom: 12px;">
@@ -159,18 +119,18 @@ class TrueStarAnalyzer {
         </div>
       </div>
       <div style="margin-bottom: 8px; font-size: 12px; color: #666;">
-        Confidence: ${analysis.confidence || 0}%
+        Confidence: ${Math.round(analysis.confidence * 100)}%
       </div>
       <div style="font-size: 12px; color: #333;">
         ${analysis.summary || 'No analysis available'}
       </div>
       ${
-        analysis.red_flags && analysis.red_flags.length > 0
+        allRedFlags && allRedFlags.length > 0
           ? `
         <details style="margin-top: 8px; font-size: 12px;">
-          <summary style="cursor: pointer; color: #007185;">Red Flags (${analysis.red_flags.length})</summary>
+          <summary style="cursor: pointer; color: #007185;">Red Flags (${allRedFlags.length})</summary>
           <ul style="margin: 4px 0 0 16px; padding: 0;">
-            ${analysis.red_flags.map((flag: string) => `<li>${flag}</li>`).join('')}
+            ${allRedFlags.map((flag: string) => `<li>${flag}</li>`).join('')}
           </ul>
         </details>
       `
@@ -182,4 +142,4 @@ class TrueStarAnalyzer {
   }
 }
 
-new TrueStarAnalyzer();
+new AmazonProductPageChecker();
