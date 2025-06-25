@@ -1,5 +1,6 @@
 import { truestarApi } from './services/truestar-api';
 import type { ReviewData } from './services/truestar-api';
+import { log } from './lib/logger';
 
 class AmazonProductPageChecker {
   constructor() {
@@ -8,7 +9,7 @@ class AmazonProductPageChecker {
 
   private init() {
     if (this.isAmazonProductPage()) {
-      console.log('TrueStar: Amazon product page detected');
+      log.info('Amazon product page detected');
       this.analyzeReviews();
     }
   }
@@ -45,7 +46,7 @@ class AmazonProductPageChecker {
           });
         }
       } catch (error) {
-        console.error('TrueStar: Error extracting review:', error);
+        log.error('Error extracting review:', error);
       }
     });
 
@@ -56,24 +57,24 @@ class AmazonProductPageChecker {
     try {
       const reviews = this.extractReviews();
       if (reviews.length === 0) {
-        console.log('TrueStar: No reviews found on page');
+        log.info('No reviews found on page');
         return;
       }
 
-      console.log(`TrueStar: Found ${reviews.length} reviews, analyzing...`);
+      log.info(`Found ${reviews.length} reviews, analyzing...`);
 
       const result = await this.checkReviews(reviews);
       this.displayResults(result);
     } catch (error) {
-      console.error('TrueStar: Error analyzing reviews:', error);
+      log.error('Error analyzing reviews:', error);
     }
   }
 
-  private async checkReviews(reviews: ReviewData[]): Promise<any> {
+  private async checkReviews(reviews: ReviewData[]): Promise<unknown> {
     return await truestarApi.analyzeReviews(reviews);
   }
 
-  private displayResults(analysis: any) {
+  private displayResults(analysis: Record<string, unknown>) {
     const existingPanel = document.querySelector('#truestar-panel');
     if (existingPanel) {
       existingPanel.remove();
@@ -96,13 +97,16 @@ class AmazonProductPageChecker {
       font-size: 14px;
     `;
 
-    const fakeScore = analysis.isFake
-      ? Math.round(analysis.confidence * 100)
-      : Math.round((1 - analysis.confidence) * 100);
+    const fakeScore = (analysis.isFake as boolean)
+      ? Math.round((analysis.confidence as number) * 100)
+      : Math.round((1 - (analysis.confidence as number)) * 100);
     const color =
       fakeScore > 70 ? '#d13212' : fakeScore > 40 ? '#ff9900' : '#067d62';
 
-    const allRedFlags = [...analysis.reasons, ...analysis.flags];
+    const allRedFlags = [
+      ...((analysis.reasons as string[]) || []),
+      ...((analysis.flags as string[]) || []),
+    ];
 
     panel.innerHTML = `
       <div style="display: flex; align-items: center; margin-bottom: 12px;">
@@ -119,10 +123,10 @@ class AmazonProductPageChecker {
         </div>
       </div>
       <div style="margin-bottom: 8px; font-size: 12px; color: #666;">
-        Confidence: ${Math.round(analysis.confidence * 100)}%
+        Confidence: ${Math.round((analysis.confidence as number) * 100)}%
       </div>
       <div style="font-size: 12px; color: #333;">
-        ${analysis.summary || 'No analysis available'}
+        ${(analysis.summary as string) || 'No analysis available'}
       </div>
       ${
         allRedFlags && allRedFlags.length > 0
