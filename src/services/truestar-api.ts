@@ -2,6 +2,7 @@ import { log } from '../lib/logger';
 
 // TODO: Use shared types with backend
 interface ReviewData {
+  id: string;
   rating: number;
   text: string;
   author: string;
@@ -19,6 +20,7 @@ interface AnalysisResult {
 
 class TrueStarApi {
   private baseUrl: string;
+  private readonly MAX_PAYLOAD_SIZE_KB = 1024; // 1MB limit
 
   constructor() {
     this.baseUrl =
@@ -27,12 +29,26 @@ class TrueStarApi {
 
   async analyzeReviews(reviews: ReviewData[]): Promise<AnalysisResult> {
     try {
+      // Log payload size for monitoring
+      const payload = JSON.stringify({ reviews });
+      const payloadSizeKB = payload.length / 1024;
+      log.info(
+        `Sending ${reviews.length} reviews to API (${payloadSizeKB.toFixed(1)} KB)`
+      );
+
+      // Warn if payload is getting large
+      if (payloadSizeKB > this.MAX_PAYLOAD_SIZE_KB) {
+        log.warn(
+          `Payload size (${payloadSizeKB.toFixed(1)} KB) exceeds recommended limit of ${this.MAX_PAYLOAD_SIZE_KB} KB`
+        );
+      }
+
       const response = await fetch(`${this.baseUrl}/check/amazon/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ reviews }),
+        body: payload,
       });
 
       if (!response.ok) {

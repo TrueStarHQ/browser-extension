@@ -6,6 +6,8 @@ import type { ReviewData, AnalysisResult } from './truestar-api';
 vi.mock('../lib/logger', () => ({
   log: {
     error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   },
 }));
 
@@ -49,12 +51,14 @@ describe('TrueStarApi', () => {
   describe('analyzeReviews', () => {
     const mockReviews: ReviewData[] = [
       {
+        id: 'R1TEST123456789',
         rating: 5,
         text: 'Great product, highly recommend!',
         author: 'John Doe',
         verified: true,
       },
       {
+        id: 'R2TEST987654321',
         rating: 1,
         text: 'Terrible quality, waste of money',
         author: 'Jane Smith',
@@ -224,6 +228,7 @@ describe('TrueStarApi', () => {
       const largeReviewSet: ReviewData[] = Array.from(
         { length: 100 },
         (_, i) => ({
+          id: `R${i}LARGE`,
           rating: Math.floor(Math.random() * 5) + 1,
           text: `Review ${i} with some content`,
           author: `User${i}`,
@@ -283,6 +288,37 @@ describe('TrueStarApi', () => {
         // Other fields should be undefined
       });
     });
+
+    it('should warn when payload exceeds size limit', async () => {
+      // Create a very large review set that exceeds 1MB
+      const veryLargeReviewSet: ReviewData[] = Array.from(
+        { length: 5000 },
+        (_, i) => ({
+          id: `R${i}VERYLONGID`,
+          rating: 5,
+          text: 'This is a very long review text that contains a lot of content to make the payload size larger. '.repeat(
+            10
+          ),
+          author: `UserWithVeryLongName${i}`,
+          verified: true,
+        })
+      );
+
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ result: mockSuccessResponse }),
+      });
+
+      await truestarApi.analyzeReviews(veryLargeReviewSet);
+
+      // Should log warning about large payload
+      expect(log.warn).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /Payload size \(\d+\.\d+ KB\) exceeds recommended limit of 1024 KB/
+        )
+      );
+    });
   });
 
   describe('singleton behavior', () => {
@@ -295,6 +331,7 @@ describe('TrueStarApi', () => {
   describe('type safety', () => {
     it('should accept properly typed ReviewData', async () => {
       const validReview: ReviewData = {
+        id: 'RVALIDTEST123',
         rating: 4.5,
         text: 'Good product',
         author: 'Test User',

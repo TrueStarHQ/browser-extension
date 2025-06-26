@@ -1,9 +1,20 @@
 import { truestarApi } from './services/truestar-api';
 import type { ReviewData } from './services/truestar-api';
 import { log } from './lib/logger';
+import {
+  analyzeReviewPagination,
+  generateReviewPageUrl,
+} from './lib/amazon-pagination';
+import { selectPagesToFetch } from './lib/review-sampling';
+import { fetchMultiplePages } from './lib/page-fetcher';
+import { parseReviewsFromHtml } from './lib/review-parser';
+import { ReviewCache } from './lib/review-cache';
 
 class AmazonProductPageChecker {
+  private reviewCache: ReviewCache;
+
   constructor() {
+    this.reviewCache = new ReviewCache({ ttlMinutes: 30 }); // Cache for 30 minutes
     this.init();
   }
 
@@ -19,6 +30,11 @@ class AmazonProductPageChecker {
       window.location.pathname.includes('/dp/') &&
       window.location.hostname.includes('amazon')
     );
+  }
+
+  private extractProductId(): string | null {
+    const match = window.location.pathname.match(/\/dp\/([A-Z0-9]+)/);
+    return match ? match[1] : null;
   }
 
   private extractReviews(): ReviewData[] {
@@ -53,20 +69,134 @@ class AmazonProductPageChecker {
     return reviews;
   }
 
+  private async extractMultiPageReviews(): Promise<ReviewData[]> {
+    const productId = this.extractProductId();
+    if (!productId) {
+      log.error('Could not extract product ID');
+      return this.extractReviews(); // Fallback to single page
+    }
+
+    // Check cache first
+    const cachedReviews = this.reviewCache.get(productId);
+    if (cachedReviews) {
+      log.info(
+        `Using cached reviews for product ${productId} (${cachedReviews.length} reviews)`
+      );
+      return cachedReviews;
+    }
+
+    try {
+      // First, get the reviews from the current page
+      const currentPageReviews = this.extractReviews();
+      log.info(`Found ${currentPageReviews.length} reviews on current page`);
+
+      // Analyze pagination info
+      const paginationInfo = analyzeReviewPagination(
+        document.documentElement.innerHTML
+      );
+      log.info(
+        `Total reviews: ${paginationInfo.totalReviews}, Total pages: ${paginationInfo.totalPages}`
+      );
+
+      if (paginationInfo.totalPages <= 1) {
+        return currentPageReviews;
+      }
+
+      // Determine which pages to fetch
+      const pagesToFetch = selectPagesToFetch(paginationInfo.totalPages);
+      log.info(
+        `Will fetch ${pagesToFetch.length} pages: ${pagesToFetch.join(', ')}`
+      );
+
+      // Generate URLs for pages to fetch (excluding page 1 if we already have it)
+      const urls = pagesToFetch
+        .filter((pageNum) => pageNum !== 1) // Skip page 1 as we already have it
+        .map((pageNum) => generateReviewPageUrl(productId, pageNum));
+
+      // Fetch pages in parallel
+      const fetchedPages = await fetchMultiplePages(urls);
+
+      // Parse reviews from fetched pages
+      const allReviews = [...currentPageReviews];
+      for (const page of fetchedPages) {
+        if (!page.error && page.html) {
+          const pageReviews = parseReviewsFromHtml(page.html);
+          allReviews.push(...pageReviews);
+          log.info(`Extracted ${pageReviews.length} reviews from ${page.url}`);
+        } else if (page.error) {
+          log.error(`Failed to fetch ${page.url}:`, page.error);
+        }
+      }
+
+      log.info(`Total reviews extracted: ${allReviews.length}`);
+
+      // Cache the results
+      this.reviewCache.set(productId, allReviews);
+      log.info(`Cached reviews for product ${productId}`);
+
+      return allReviews;
+    } catch (error) {
+      log.error(
+        'Error in multi-page extraction, falling back to single page:',
+        error
+      );
+      return this.extractReviews();
+    }
+  }
+
   private async analyzeReviews() {
     try {
-      const reviews = this.extractReviews();
+      // Show loading indicator
+      this.showLoadingIndicator();
+
+      const reviews = await this.extractMultiPageReviews();
       if (reviews.length === 0) {
         log.info('No reviews found on page');
+        this.hideLoadingIndicator();
         return;
       }
 
       log.info(`Found ${reviews.length} reviews, analyzing...`);
 
       const result = await this.checkReviews(reviews);
+      this.hideLoadingIndicator();
       this.displayResults(result);
     } catch (error) {
       log.error('Error analyzing reviews:', error);
+      this.hideLoadingIndicator();
+    }
+  }
+
+  private showLoadingIndicator() {
+    const loader = document.createElement('div');
+    loader.id = 'truestar-loader';
+    loader.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      background: white;
+      border: 2px solid #007185;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10000;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      text-align: center;
+    `;
+    loader.innerHTML = `
+      <strong style="color: #232f3e;">TrueStar Analysis</strong>
+      <div style="margin-top: 12px;">Loading reviews from multiple pages...</div>
+      <div style="margin-top: 8px; font-size: 12px; color: #666;">This may take a moment</div>
+    `;
+    document.body.appendChild(loader);
+  }
+
+  private hideLoadingIndicator() {
+    const loader = document.querySelector('#truestar-loader');
+    if (loader) {
+      loader.remove();
     }
   }
 
@@ -143,6 +273,14 @@ class AmazonProductPageChecker {
     `;
 
     document.body.appendChild(panel);
+  }
+}
+
+// Export for testing
+export class AmazonMultiPageExtractor {
+  extractProductId(): string | null {
+    const match = window.location.pathname.match(/\/dp\/([A-Z0-9]+)/);
+    return match ? match[1] : null;
   }
 }
 
