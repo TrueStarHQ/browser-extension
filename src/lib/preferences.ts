@@ -1,4 +1,4 @@
-class PreferencesManager {
+export class PreferencesManager {
   private loadPromise: Promise<void>;
 
   // Single source of truth for preferences and their defaults
