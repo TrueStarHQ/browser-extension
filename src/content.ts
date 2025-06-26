@@ -38,35 +38,8 @@ class AmazonProductPageChecker {
   }
 
   private extractReviews(): ReviewData[] {
-    const reviews: ReviewData[] = [];
-    const reviewElements = document.querySelectorAll('[data-hook="review"]');
-
-    reviewElements.forEach((reviewEl) => {
-      try {
-        const ratingEl = reviewEl.querySelector(
-          '[data-hook="review-star-rating"]'
-        );
-        const textEl = reviewEl.querySelector('[data-hook="review-body"]');
-        const authorEl = reviewEl.querySelector('[data-hook="review-author"]');
-        const verifiedEl = reviewEl.querySelector('[data-hook="avp-badge"]');
-
-        if (ratingEl && textEl) {
-          const ratingText = ratingEl.textContent || '';
-          const rating = parseFloat(ratingText.match(/(\d\.?\d?)/)?.[1] || '0');
-
-          reviews.push({
-            rating,
-            text: textEl.textContent?.trim() || '',
-            author: authorEl?.textContent?.trim() || 'Anonymous',
-            verified: !!verifiedEl,
-          });
-        }
-      } catch (error) {
-        log.error('Error extracting review:', error);
-      }
-    });
-
-    return reviews;
+    // Use the centralized parser to extract reviews from current page
+    return parseReviewsFromHtml(document.documentElement.innerHTML);
   }
 
   private async extractMultiPageReviews(): Promise<ReviewData[]> {
