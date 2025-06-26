@@ -1,8 +1,5 @@
 class PreferencesManager {
   private loadPromise: Promise<void>;
-  private changeListeners: Set<
-    (changes: Partial<typeof this.preferences>) => void
-  > = new Set();
 
   // Single source of truth for preferences and their defaults
   private preferences = {
@@ -11,15 +8,27 @@ class PreferencesManager {
 
   constructor() {
     this.loadPromise = this.loadPreferences();
-    this.setupStorageListener();
   }
 
   private async loadPreferences(): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const keys = Object.keys(this.preferences) as Array<
         keyof typeof this.preferences
       >;
       chrome.storage.local.get(keys, (result) => {
+        if (chrome.runtime.lastError) {
+          console.error(
+            'Failed to load preferences:',
+            chrome.runtime.lastError
+          );
+          reject(
+            new Error(
+              `Failed to load preferences: ${chrome.runtime.lastError.message}`
+            )
+          );
+          return;
+        }
+
         // Update preferences with stored values or keep defaults
         for (const key of keys) {
           if (result[key] !== undefined) {
@@ -31,60 +40,59 @@ class PreferencesManager {
     });
   }
 
-  private setupStorageListener(): void {
-    chrome.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName !== 'local') return;
-
-      const relevantChanges: Partial<typeof this.preferences> = {};
-
-      // Handle all preference changes generically
-      for (const [key, change] of Object.entries(changes)) {
-        if (key in this.preferences) {
-          const prefKey = key as keyof typeof this.preferences;
-          const newValue = change.newValue ?? this.preferences[prefKey];
-
-          // Update the preference
-          this.preferences[prefKey] = newValue;
-          relevantChanges[prefKey] = newValue;
-        }
-      }
-
-      if (Object.keys(relevantChanges).length > 0) {
-        this.changeListeners.forEach((listener) => listener(relevantChanges));
-      }
-    });
-  }
-
+  /**
+   * Wait for preferences to be loaded from storage before using them.
+   */
   async waitForLoad(): Promise<void> {
     await this.loadPromise;
   }
 
+  /**
+   * Enable or disable error logging.
+   */
   setErrorLoggingEnabled(enabled: boolean): void {
     this.setPreference('errorLoggingEnabled', enabled);
   }
 
-  private setPreference<K extends keyof typeof this.preferences>(
+  /**
+   * Set a preference value with type safety.
+   * @param key - The preference key
+   * @param value - The new value for the preference
+   */
+  setPreference<K extends keyof typeof this.preferences>(
     key: K,
     value: (typeof this.preferences)[K]
   ): void {
+    const oldValue = this.preferences[key];
     this.preferences[key] = value;
-    chrome.storage.local.set({ [key]: value });
+    chrome.storage.local.set({ [key]: value }, () => {
+      if (chrome.runtime.lastError) {
+        console.error(
+          `Failed to save preference ${String(key)}:`,
+          chrome.runtime.lastError
+        );
+        // Revert the in-memory change since storage failed
+        this.preferences[key] = oldValue;
+      }
+    });
   }
 
+  /**
+   * Get a preference value with type safety.
+   * @param key - The preference key
+   * @returns The current value of the preference
+   */
+  getPreference<K extends keyof typeof this.preferences>(
+    key: K
+  ): (typeof this.preferences)[K] {
+    return this.preferences[key];
+  }
+
+  /**
+   * Check if error logging is currently enabled.
+   */
   isErrorLoggingEnabled(): boolean {
     return this.preferences.errorLoggingEnabled;
-  }
-
-  onPreferencesChanged(
-    listener: (changes: Partial<typeof this.preferences>) => void
-  ): void {
-    this.changeListeners.add(listener);
-  }
-
-  removePreferencesChangedListener(
-    listener: (changes: Partial<typeof this.preferences>) => void
-  ): void {
-    this.changeListeners.delete(listener);
   }
 }
 
