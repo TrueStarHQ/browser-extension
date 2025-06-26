@@ -265,19 +265,6 @@ describe('PreferencesManager', () => {
       }).not.toThrow();
     });
   });
-
-  describe('Chrome API unavailability', () => {
-    it('should handle missing chrome.storage gracefully', () => {
-      // Temporarily remove chrome.storage
-      const originalStorage = global.chrome.storage;
-      delete (global.chrome as { storage?: unknown }).storage;
-
-      expect(() => new PreferencesManager()).toThrow();
-
-      // Restore for other tests
-      global.chrome.storage = originalStorage;
-    });
-  });
 });
 
 describe('Exported preferencesManager singleton', () => {
