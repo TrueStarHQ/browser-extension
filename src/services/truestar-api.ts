@@ -7,6 +7,12 @@ interface ReviewData {
   text: string;
   author: string;
   verified: boolean;
+  date?: string;
+  helpfulVotes?: number;
+  totalVotes?: number;
+  productVariation?: string;
+  isVineReview?: boolean;
+  badges?: string[];
 }
 
 // TODO: Use shared types with backend
