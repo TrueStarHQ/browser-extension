@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
   import { Button } from './ui/button';
-  import { cn } from '$lib/utils';
+  import { cn } from '$lib/utils/style-utils';
 
   interface Props {
     analysis: {
