@@ -55,14 +55,14 @@ describe('Logger', () => {
 
   describe('warning', () => {
     it('should log warning messages with TrueStar prefix', () => {
-      log.warning('Warning message');
+      log.warn('Warning message');
 
       expect(consoleSpy.warn).toHaveBeenCalledWith('TrueStar: Warning message');
     });
 
     it('should pass additional arguments to console.warn', () => {
       const obj = { warning: 'data' };
-      log.warning('Warning message', obj);
+      log.warn('Warning message', obj);
 
       expect(consoleSpy.warn).toHaveBeenCalledWith(
         'TrueStar: Warning message',
@@ -116,7 +116,7 @@ describe('Logger', () => {
   describe('singleton behavior', () => {
     it('should maintain consistent prefix across calls', () => {
       log.info('First message');
-      log.warning('Second message');
+      log.warn('Second message');
       log.error('Third message');
 
       expect(consoleSpy.info).toHaveBeenCalledWith('TrueStar: First message');

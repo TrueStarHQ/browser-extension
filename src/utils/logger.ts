@@ -15,7 +15,7 @@ class Logger {
     console.info(`${this.prefix} ${message}`, ...args);
   }
 
-  warning(message: string, ...args: unknown[]): void {
+  warn(message: string, ...args: unknown[]): void {
     console.warn(`${this.prefix} ${message}`, ...args);
   }
 

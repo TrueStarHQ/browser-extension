@@ -1,4 +1,4 @@
-import { preferencesManager } from './preferences';
+import { preferencesManager } from './user-preferences';
 import * as Sentry from '@sentry/svelte';
 
 interface ErrorReport {
