@@ -25,7 +25,7 @@
     "storage"
   ],
   "action": {
-    "default_popup": "src/popup.html",
+    "default_popup": "src/popup/popup.html",
     "default_title": "TrueStar Settings"
   },
   "host_permissions": [
