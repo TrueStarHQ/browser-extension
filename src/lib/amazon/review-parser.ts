@@ -1,4 +1,4 @@
-import type { ReviewData } from '../services/truestar-api';
+import type { ReviewData } from '../../services/truestar-api';
 import { generateFallbackId } from './review-id-generator';
 
 export function parseReviewsFromHtml(html: string): ReviewData[] {

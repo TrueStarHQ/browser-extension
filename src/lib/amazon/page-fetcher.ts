@@ -1,5 +1,5 @@
-import { RateLimiter } from './rate-limiter';
-import { retryWithBackoff } from './retry-helper';
+import { RateLimiter } from '../../utils/rate-limiter';
+import { retryWithBackoff } from '../../utils/retry-helper';
 
 export interface PageResult {
   url: string;

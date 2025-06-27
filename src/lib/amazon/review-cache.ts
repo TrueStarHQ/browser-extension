@@ -1,4 +1,4 @@
-import type { ReviewData } from '../services/truestar-api';
+import type { ReviewData } from '../../services/truestar-api';
 
 interface CacheEntry {
   reviews: ReviewData[];
