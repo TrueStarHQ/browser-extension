@@ -16,7 +16,7 @@
         "https://www.amazon.es/*/dp/*",
         "https://www.amazon.com.au/*/dp/*"
       ],
-      "js": ["src/content.ts"],
+      "js": ["src/content/content.ts"],
       "run_at": "document_end"
     }
   ],

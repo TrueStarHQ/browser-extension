@@ -1,17 +1,39 @@
-import { truestarApi } from './services/truestar-api';
-import type { ReviewData } from './services/truestar-api';
-import { log } from './lib/logger';
+import { truestarApi } from '../services/truestar-api';
+import type { ReviewData, AnalysisResult } from '../services/truestar-api';
+import { log } from '../utils/logger';
 import {
   analyzeReviewPagination,
   generateReviewPageUrl,
-} from './lib/amazon-pagination';
-import { selectPagesToFetch } from './lib/review-sampling';
-import { fetchMultiplePages } from './lib/page-fetcher';
-import { parseReviewsFromHtml } from './lib/review-parser';
-import { ReviewCache } from './lib/review-cache';
+} from '../lib/amazon/amazon-pagination';
+import { selectPagesToFetch } from '../lib/amazon/review-sampling';
+import { fetchMultiplePages } from '../lib/amazon/page-fetcher';
+import { parseReviewsFromHtml } from '../lib/amazon/review-parser';
+import { ReviewCache } from '../lib/amazon/review-cache';
+import { mountComponent } from '../utils/mount-component';
+import AnalysisPanel from '../components/AnalysisPanel.svelte';
+import LoadingIndicator from '../components/LoadingIndicator.svelte';
+
+// Validation function for API response
+function isValidAnalysisResult(obj: unknown): obj is AnalysisResult {
+  if (!obj || typeof obj !== 'object') return false;
+  
+  const analysis = obj as Record<string, unknown>;
+  
+  return (
+    typeof analysis.isFake === 'boolean' &&
+    typeof analysis.confidence === 'number' &&
+    typeof analysis.summary === 'string' &&
+    Array.isArray(analysis.reasons) &&
+    analysis.reasons.every((r: unknown) => typeof r === 'string') &&
+    Array.isArray(analysis.flags) &&
+    analysis.flags.every((f: unknown) => typeof f === 'string')
+  );
+}
 
 class AmazonProductPageChecker {
   private reviewCache: ReviewCache;
+  private loadingComponent: ReturnType<typeof mountComponent> | null = null;
+  private analysisComponent: ReturnType<typeof mountComponent> | null = null;
 
   constructor() {
     this.reviewCache = new ReviewCache({ ttlMinutes: 30 }); // Cache for 30 minutes
@@ -133,7 +155,7 @@ class AmazonProductPageChecker {
 
       const result = await this.checkReviews(reviews);
       this.hideLoadingIndicator();
-      this.displayResults(result);
+      this.displayResults(result as Record<string, unknown>);
     } catch (error) {
       log.error('Error analyzing reviews:', error);
       this.hideLoadingIndicator();
@@ -141,111 +163,75 @@ class AmazonProductPageChecker {
   }
 
   private showLoadingIndicator() {
-    const loader = document.createElement('div');
-    loader.id = 'truestar-loader';
-    loader.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      width: 300px;
-      background: white;
-      border: 2px solid #007185;
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 10000;
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-      text-align: center;
-    `;
-    loader.innerHTML = `
-      <strong style="color: #232f3e;">TrueStar Analysis</strong>
-      <div style="margin-top: 12px;">Loading reviews from multiple pages...</div>
-      <div style="margin-top: 8px; font-size: 12px; color: #666;">This may take a moment</div>
-    `;
-    document.body.appendChild(loader);
+    this.hideLoadingIndicator(); // Remove any existing loader
+    this.loadingComponent = mountComponent(LoadingIndicator, {});
   }
 
   private hideLoadingIndicator() {
-    const loader = document.querySelector('#truestar-loader');
-    if (loader) {
-      loader.remove();
+    if (this.loadingComponent) {
+      this.loadingComponent.destroy();
+      this.loadingComponent = null;
     }
   }
 
-  private async checkReviews(reviews: ReviewData[]): Promise<unknown> {
+  private async checkReviews(reviews: ReviewData[]): Promise<AnalysisResult> {
     return await truestarApi.analyzeReviews(reviews);
   }
 
-  private displayResults(analysis: Record<string, unknown>) {
-    const existingPanel = document.querySelector('#truestar-panel');
-    if (existingPanel) {
-      existingPanel.remove();
+  private displayResults(analysis: unknown) {
+    // Validate the analysis response
+    if (!isValidAnalysisResult(analysis)) {
+      log.error('Invalid analysis result received:', analysis);
+      // Display error state
+      this.displayError('Invalid analysis response received');
+      return;
     }
 
-    const panel = document.createElement('div');
-    panel.id = 'truestar-panel';
-    panel.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      width: 300px;
-      background: white;
-      border: 2px solid #007185;
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 10000;
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-    `;
+    // Remove any existing panel
+    if (this.analysisComponent) {
+      this.analysisComponent.destroy();
+    }
 
-    const fakeScore = (analysis.isFake as boolean)
-      ? Math.round((analysis.confidence as number) * 100)
-      : Math.round((1 - (analysis.confidence as number)) * 100);
-    const color =
-      fakeScore > 70 ? '#d13212' : fakeScore > 40 ? '#ff9900' : '#067d62';
-
-    const allRedFlags = [
-      ...((analysis.reasons as string[]) || []),
-      ...((analysis.flags as string[]) || []),
-    ];
-
-    panel.innerHTML = `
-      <div style="display: flex; align-items: center; margin-bottom: 12px;">
-        <strong style="color: #232f3e;">TrueStar Analysis</strong>
-        <button onclick="this.parentElement.parentElement.remove()" style="margin-left: auto; background: none; border: none; font-size: 18px; cursor: pointer;">×</button>
-      </div>
-      <div style="margin-bottom: 8px;">
-        <div style="display: flex; justify-content: space-between;">
-          <span>Fake Review Score:</span>
-          <span style="font-weight: bold; color: ${color};">${fakeScore}%</span>
-        </div>
-        <div style="background: #f0f0f0; height: 6px; border-radius: 3px; margin-top: 4px;">
-          <div style="background: ${color}; height: 100%; width: ${fakeScore}%; border-radius: 3px;"></div>
-        </div>
-      </div>
-      <div style="margin-bottom: 8px; font-size: 12px; color: #666;">
-        Confidence: ${Math.round((analysis.confidence as number) * 100)}%
-      </div>
-      <div style="font-size: 12px; color: #333;">
-        ${(analysis.summary as string) || 'No analysis available'}
-      </div>
-      ${
-        allRedFlags && allRedFlags.length > 0
-          ? `
-        <details style="margin-top: 8px; font-size: 12px;">
-          <summary style="cursor: pointer; color: #007185;">Red Flags (${allRedFlags.length})</summary>
-          <ul style="margin: 4px 0 0 16px; padding: 0;">
-            ${allRedFlags.map((flag: string) => `<li>${flag}</li>`).join('')}
-          </ul>
-        </details>
-      `
-          : ''
+    // Mount the new analysis panel with validated data
+    this.analysisComponent = mountComponent(AnalysisPanel, {
+      analysis: {
+        isFake: analysis.isFake,
+        confidence: analysis.confidence,
+        summary: analysis.summary,
+        reasons: analysis.reasons,
+        flags: analysis.flags
+      },
+      onClose: () => {
+        if (this.analysisComponent) {
+          this.analysisComponent.destroy();
+          this.analysisComponent = null;
+        }
       }
-    `;
+    });
+  }
 
-    document.body.appendChild(panel);
+  private displayError(message: string) {
+    // Remove any existing panels
+    if (this.analysisComponent) {
+      this.analysisComponent.destroy();
+    }
+
+    // Display error state using AnalysisPanel with error data
+    this.analysisComponent = mountComponent(AnalysisPanel, {
+      analysis: {
+        isFake: false,
+        confidence: 0,
+        summary: message,
+        reasons: ['Unable to analyze reviews due to an error'],
+        flags: []
+      },
+      onClose: () => {
+        if (this.analysisComponent) {
+          this.analysisComponent.destroy();
+          this.analysisComponent = null;
+        }
+      }
+    });
   }
 }
 
