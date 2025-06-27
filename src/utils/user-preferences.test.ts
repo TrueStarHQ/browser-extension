@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mockChrome } from '../test-setup';
-import { PreferencesManager, preferencesManager } from './preferences';
+import { mockChrome } from '../../test/test-setup';
+import { PreferencesManager, preferencesManager } from './user-preferences';
 
 describe('PreferencesManager', () => {
   beforeEach(() => {
