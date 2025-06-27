@@ -3,7 +3,7 @@ import { truestarApi } from './truestar-api';
 import type { ReviewData, AnalysisResult } from './truestar-api';
 
 // Mock the logger
-vi.mock('../lib/logger', () => ({
+vi.mock('../utils/logger', () => ({
   log: {
     error: vi.fn(),
     info: vi.fn(),
@@ -11,7 +11,7 @@ vi.mock('../lib/logger', () => ({
   },
 }));
 
-import { log } from '../lib/logger';
+import { log } from '../utils/logger';
 
 describe('TrueStarApi', () => {
   let fetchMock: ReturnType<typeof vi.fn>;

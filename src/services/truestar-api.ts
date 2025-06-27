@@ -1,4 +1,4 @@
-import { log } from '../lib/logger';
+import { log } from '../utils/logger';
 
 // TODO: Use shared types with backend
 interface ReviewData {
