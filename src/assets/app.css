@@ -5,7 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root,
-.shadow-root {
+:host {
+  /* Theme variables */
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -119,4 +120,90 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* 
+ * Tailwind CSS v4 Shadow DOM Compatibility Fix
+ * 
+ * Tailwind v4 uses @property declarations which don't work in Shadow DOM.
+ * We must manually initialize these CSS custom properties.
+ * 
+ * Tracking issues:
+ * - https://github.com/tailwindlabs/tailwindcss/discussions/15556
+ * - https://github.com/w3c/csswg-drafts/issues/10541
+ */
+:root,
+:host {
+  /* Spacing & Dividers */
+  --tw-space-x-reverse: 0;
+  --tw-space-y-reverse: 0;
+  --tw-divide-y-reverse: 0;
+  
+  /* Typography */
+  --tw-border-style: solid;
+  --tw-font-weight: initial;
+  --tw-tracking: initial;
+  --tw-leading: initial;
+  
+  /* Transforms - from GitHub issue */
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-translate-z: 0;
+  --tw-rotate-x: rotateX(0);
+  --tw-rotate-y: rotateY(0);
+  --tw-rotate-z: rotateZ(0);
+  --tw-skew-x: skewX(0);
+  --tw-skew-y: skewY(0);
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  
+  /* Gradients */
+  --tw-gradient-position: initial;
+  --tw-gradient-from: #0000;
+  --tw-gradient-via: #0000;
+  --tw-gradient-to: #0000;
+  --tw-gradient-stops: initial;
+  --tw-gradient-via-stops: initial;
+  --tw-gradient-from-position: 0%;
+  --tw-gradient-via-position: 50%;
+  --tw-gradient-to-position: 100%;
+  
+  /* Shadows */
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-color: initial;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-inset-shadow: 0 0 #0000;
+  --tw-inset-shadow-color: initial;
+  
+  /* Rings */
+  --tw-ring-color: initial;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-inset-ring-color: initial;
+  --tw-inset-ring-shadow: 0 0 #0000;
+  --tw-ring-inset: initial;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-offset-shadow: 0 0 #0000;
+  
+  /* Filters */
+  --tw-blur: ;
+  --tw-brightness: ;
+  --tw-contrast: ;
+  --tw-grayscale: ;
+  --tw-hue-rotate: ;
+  --tw-invert: ;
+  --tw-saturate: ;
+  --tw-sepia: ;
+  --tw-drop-shadow: ;
+  
+  /* Backdrop Filters */
+  --tw-backdrop-blur: ;
+  --tw-backdrop-brightness: ;
+  --tw-backdrop-contrast: ;
+  --tw-backdrop-grayscale: ;
+  --tw-backdrop-hue-rotate: ;
+  --tw-backdrop-invert: ;
+  --tw-backdrop-opacity: ;
+  --tw-backdrop-saturate: ;
+  --tw-backdrop-sepia: ;
 }

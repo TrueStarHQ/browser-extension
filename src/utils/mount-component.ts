@@ -48,7 +48,6 @@ export function mountComponent<T extends Record<string, any>>(
 
     // Svelte needs a regular element, not the shadow root itself
     const shadowContainer = document.createElement('div');
-    shadowContainer.className = 'shadow-root';
     shadow.appendChild(shadowContainer);
     mountTarget = shadowContainer;
 
