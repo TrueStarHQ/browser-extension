@@ -1,3 +1,5 @@
+import { log } from './logger';
+
 export class PreferencesManager {
   private loadPromise: Promise<void>;
 
@@ -17,10 +19,7 @@ export class PreferencesManager {
       >;
       chrome.storage.local.get(keys, (result) => {
         if (chrome.runtime.lastError) {
-          console.error(
-            'Failed to load preferences:',
-            chrome.runtime.lastError
-          );
+          log.error('Failed to load preferences:', chrome.runtime.lastError);
           reject(
             new Error(
               `Failed to load preferences: ${chrome.runtime.lastError.message}`
@@ -67,7 +66,7 @@ export class PreferencesManager {
     this.preferences[key] = value;
     chrome.storage.local.set({ [key]: value }, () => {
       if (chrome.runtime.lastError) {
-        console.error(
+        log.error(
           `Failed to save preference ${String(key)}:`,
           chrome.runtime.lastError
         );

@@ -1,3 +1,4 @@
+import { log } from '$lib/utils/logger';
 import type { ReviewData } from '../../services/truestar-api';
 import { generateFallbackId } from './review-id-generator';
 
@@ -16,10 +17,7 @@ export function parseReviewsFromHtml(html: string): ReviewData[] {
       if (!id) {
         // Generate fallback ID if extraction fails
         id = generateFallbackId(index);
-        console.warn(
-          'Review element missing ID attribute, using fallback:',
-          id
-        );
+        log.warn('Review element missing ID attribute, using fallback:', id);
       }
 
       // Extract author name

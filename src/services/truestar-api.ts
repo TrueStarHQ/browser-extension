@@ -1,6 +1,6 @@
 import { log } from '../utils/logger';
 
-// TODO: Use shared types with backend
+// TODO: Use shared types with backend, generated from OpenAPI spec
 interface ReviewData {
   id: string;
   rating: number;
@@ -15,7 +15,7 @@ interface ReviewData {
   badges?: string[];
 }
 
-// TODO: Use shared types with backend
+// TODO: Use shared types with backend, generated from OpenAPI spec
 interface AnalysisResult {
   isFake: boolean;
   confidence: number;
