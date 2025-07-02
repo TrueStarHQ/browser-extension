@@ -1163,6 +1163,7 @@ __metadata:
     clsx: "npm:^2.1.1"
     eslint: "npm:^9.29.0"
     eslint-config-prettier: "npm:^10.1.5"
+    eslint-plugin-simple-import-sort: "npm:^12.1.1"
     eslint-plugin-svelte: "npm:^3.9.3"
     husky: "npm:^9.1.7"
     jsdom: "npm:^26.1.0"
@@ -2350,6 +2351,15 @@ __metadata:
   bin:
     eslint-config-prettier: bin/cli.js
   checksum: 10c0/5486255428e4577e8064b40f27db299faf7312b8e43d7b4bc913a6426e6c0f5950cd519cad81ae24e9aecb4002c502bc665c02e3b52efde57af2debcf27dd6e0
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-simple-import-sort@npm:^12.1.1":
+  version: 12.1.1
+  resolution: "eslint-plugin-simple-import-sort@npm:12.1.1"
+  peerDependencies:
+    eslint: ">=5.0.0"
+  checksum: 10c0/0ad1907ad9ddbadd1db655db0a9d0b77076e274b793a77b982c8525d808d868e6ecfce24f3a411e8a1fa551077387f9ebb38c00956073970ebd7ee6a029ce2b3
   languageName: node
   linkType: hard
 
