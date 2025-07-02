@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mountComponent } from './mount-component';
 import { mount, unmount } from 'svelte';
+import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { mountComponent } from './mount-component';
 
 // Mock Svelte mount/unmount functions
 vi.mock('svelte', () => ({

@@ -24,7 +24,7 @@ const sharedRules = {
 
 export default [
   {
-    ignores: ['dist', 'node_modules'],
+    ignores: ['dist', 'node_modules', '.yarn'],
   },
   js.configs.recommended,
   {

@@ -81,4 +81,4 @@ class TrueStarApi {
 }
 
 export const truestarApi = new TrueStarApi();
-export type { ReviewData, AnalysisResult };
+export type { AnalysisResult,ReviewData };

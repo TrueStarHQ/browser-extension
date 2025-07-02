@@ -1,4 +1,5 @@
 import { log } from '$lib/utils/logger';
+
 import type { ReviewData } from '../../services/truestar-api';
 import { generateFallbackId } from './review-id-generator';
 

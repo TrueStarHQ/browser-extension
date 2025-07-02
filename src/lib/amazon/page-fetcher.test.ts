@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { fetchReviewPage, fetchMultiplePages } from './page-fetcher';
+import { describe, expect, it, vi } from 'vitest';
+
+import { fetchMultiplePages,fetchReviewPage } from './page-fetcher';
 
 describe('Page Fetcher', () => {
   describe('fetchReviewPage', () => {

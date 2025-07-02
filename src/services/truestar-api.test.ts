@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { AnalysisResult,ReviewData } from './truestar-api';
 import { truestarApi } from './truestar-api';
-import type { ReviewData, AnalysisResult } from './truestar-api';
 
 // Mock the logger
 vi.mock('../utils/logger', () => ({

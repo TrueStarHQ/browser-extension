@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { preferencesManager } from '../utils/user-preferences';
   import '../assets/app.css';
+
+  import { onMount } from 'svelte';
+
+  import { preferencesManager } from '../utils/user-preferences';
 
   let errorReportingEnabled = false;
   let loading = true;

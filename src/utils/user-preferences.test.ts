@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { mockChrome } from '../../test/test-setup';
 import { PreferencesManager, preferencesManager } from './user-preferences';
 

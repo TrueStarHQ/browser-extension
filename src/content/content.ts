@@ -1,17 +1,17 @@
-import { truestarApi } from '../services/truestar-api';
-import type { ReviewData, AnalysisResult } from '../services/truestar-api';
-import { log } from '../utils/logger';
+import AnalysisPanel from '../components/AnalysisPanel.svelte';
+import LoadingIndicator from '../components/LoadingIndicator.svelte';
 import {
   analyzeReviewPagination,
   generateReviewPageUrl,
 } from '../lib/amazon/amazon-pagination';
-import { selectPagesToFetch } from '../lib/amazon/review-sampling';
 import { fetchMultiplePages } from '../lib/amazon/page-fetcher';
-import { parseReviewsFromHtml } from '../lib/amazon/review-parser';
 import { ReviewCache } from '../lib/amazon/review-cache';
+import { parseReviewsFromHtml } from '../lib/amazon/review-parser';
+import { selectPagesToFetch } from '../lib/amazon/review-sampling';
+import type { AnalysisResult,ReviewData } from '../services/truestar-api';
+import { truestarApi } from '../services/truestar-api';
+import { log } from '../utils/logger';
 import { mountComponent } from '../utils/mount-component';
-import AnalysisPanel from '../components/AnalysisPanel.svelte';
-import LoadingIndicator from '../components/LoadingIndicator.svelte';
 
 // Validation function for API response
 function isValidAnalysisResult(obj: unknown): obj is AnalysisResult {

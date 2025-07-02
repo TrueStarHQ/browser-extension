@@ -1,7 +1,9 @@
 <script lang="ts">
   import type { HTMLButtonAttributes } from 'svelte/elements';
-  import { buttonVariants, type Variant, type Size } from './index.js';
+
   import { cn } from '$lib/utils/style-utils';
+
+  import { buttonVariants, type Size,type Variant } from './index.js';
 
   type $$Props = HTMLButtonAttributes & {
     variant?: Variant;

@@ -3,8 +3,8 @@
  * CSS is imported at build time using Vite's ?inline query.
  */
 
-import { mount, unmount } from 'svelte';
 import type { Component } from 'svelte';
+import { mount, unmount } from 'svelte';
 
 // Import the compiled CSS as a string at build time
 // postcss-import will process @import statements

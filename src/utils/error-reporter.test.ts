@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ErrorReporter } from './error-reporter';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { mockChrome } from '../test-setup';
+import { ErrorReporter } from './error-reporter';
 
 // Mock Sentry module
 vi.mock('@sentry/svelte', () => ({
@@ -29,6 +30,7 @@ vi.mock('./preferences', () => ({
 }));
 
 import * as Sentry from '@sentry/svelte';
+
 import { preferencesManager } from './preferences';
 
 describe('ErrorReporter', () => {
