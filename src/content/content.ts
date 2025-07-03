@@ -56,7 +56,7 @@ class AmazonProductPageChecker {
 
   private extractProductId(): string | null {
     const match = window.location.pathname.match(/\/dp\/([A-Z0-9]+)/);
-    return match ? match[1] : null;
+    return match?.[1] ?? null;
   }
 
   private extractReviews(): ReviewData[] {
@@ -239,7 +239,7 @@ class AmazonProductPageChecker {
 export class AmazonMultiPageExtractor {
   extractProductId(): string | null {
     const match = window.location.pathname.match(/\/dp\/([A-Z0-9]+)/);
-    return match ? match[1] : null;
+    return match?.[1] ?? null;
   }
 }
 
