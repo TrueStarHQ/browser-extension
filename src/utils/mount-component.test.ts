@@ -1,5 +1,5 @@
 import { mount, unmount } from 'svelte';
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { mountComponent } from './mount-component';
 
@@ -9,9 +9,9 @@ vi.mock('svelte', () => ({
   unmount: vi.fn(),
 }));
 
-// Mock the style getter
-vi.mock('./get-component-styles', () => ({
-  getComponentStyles: vi.fn(() => 'mocked styles'),
+// Mock the CSS import
+vi.mock('../assets/app.css?inline', () => ({
+  default: 'mocked styles',
 }));
 
 // Simple test component
@@ -131,7 +131,7 @@ describe('mountComponent', () => {
 
     // Should warn about lack of Shadow DOM support
     expect(consoleSpy).toHaveBeenCalledWith(
-      'Shadow DOM not supported - styles may conflict with host page'
+      'TrueStar: Shadow DOM not supported - styles may conflict with host page'
     );
 
     // Should fall back to regular mounting without shadow DOM

@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom';
 
+import { vi } from 'vitest';
+
 // Mock Chrome APIs for testing
 const chrome = {
   storage: {
@@ -12,7 +14,7 @@ const chrome = {
     },
   },
   runtime: {
-    lastError: null,
+    lastError: null as { message: string } | null | undefined,
   },
 };
 

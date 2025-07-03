@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { fetchMultiplePages,fetchReviewPage } from './page-fetcher';
+import { fetchMultiplePages, fetchReviewPage } from './page-fetcher';
 
 describe('Page Fetcher', () => {
   describe('fetchReviewPage', () => {
@@ -36,7 +36,7 @@ describe('Page Fetcher', () => {
 
   describe('fetchMultiplePages', () => {
     it('should fetch multiple pages in parallel', async () => {
-      const mockResponses = {
+      const mockResponses: Record<string, string> = {
         'https://www.amazon.com/product-reviews/B08N5WRWNW?pageNumber=1':
           '<html>Page 1</html>',
         'https://www.amazon.com/product-reviews/B08N5WRWNW?pageNumber=2':
@@ -45,7 +45,7 @@ describe('Page Fetcher', () => {
           '<html>Page 3</html>',
       };
 
-      global.fetch = vi.fn().mockImplementation((url) => {
+      global.fetch = vi.fn().mockImplementation((url: string) => {
         return Promise.resolve({
           ok: true,
           text: vi.fn().mockResolvedValue(mockResponses[url]),

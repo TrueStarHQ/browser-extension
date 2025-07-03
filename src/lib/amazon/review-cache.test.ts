@@ -1,6 +1,6 @@
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ReviewData } from '../services/truestar-api';
+import type { ReviewData } from '../../services/truestar-api';
 import { ReviewCache } from './review-cache';
 
 describe('ReviewCache', () => {

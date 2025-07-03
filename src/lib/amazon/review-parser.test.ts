@@ -111,7 +111,7 @@ describe('Review Parser', () => {
       expect(reviews[0].verified).toBe(false);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'Review element missing ID attribute, using fallback:',
+        'TrueStar: Review element missing ID attribute, using fallback:',
         `UNKNOWN_${expectedTimestamp}_0`
       );
 
