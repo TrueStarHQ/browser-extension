@@ -8,7 +8,7 @@ const REVIEWS_PER_PAGE = 10;
 export function analyzeReviewPagination(html: string): PaginationInfo {
   const reviewCountMatch = html.match(/(\d+(?:,\d+)*)\s+global reviews/);
 
-  if (reviewCountMatch) {
+  if (reviewCountMatch && reviewCountMatch[1]) {
     const countStr = reviewCountMatch[1].replace(/,/g, '');
     const totalReviews = parseInt(countStr, 10);
     const totalPages = Math.ceil(totalReviews / REVIEWS_PER_PAGE);
