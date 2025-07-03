@@ -20,6 +20,15 @@
     "format:check": "prettier --check .",
     "prepare": "husky"
   },
+  "lint-staged": {
+    "src/**/*.{js,ts,svelte}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "@sentry/svelte": "^9.32.0"
+  },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.2",
     "@internationalized/date": "^3.8.1",
@@ -41,6 +50,7 @@
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-svelte": "^3.9.3",
+    "globals": "^16.3.0",
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.2",
@@ -58,15 +68,6 @@
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
     "vitest": "^3.2.4"
-  },
-  "lint-staged": {
-    "src/**/*.{js,ts,svelte}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
-  },
-  "dependencies": {
-    "@sentry/svelte": "^9.32.0"
   },
   "packageManager": "yarn@4.9.2"
 }

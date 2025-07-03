@@ -5,6 +5,7 @@ import svelteEslint from 'eslint-plugin-svelte';
 import svelteParser from 'svelte-eslint-parser';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import globals from 'globals';
 
 // Shared rules that apply to both .ts and .svelte files
 const sharedRules = {
@@ -37,9 +38,9 @@ export default [
         project: './tsconfig.app.json',
       },
       globals: {
-        browser: true,
-        es2022: true,
-        node: true,
+        ...globals.browser,
+        ...globals.node,
+        chrome: 'readonly',
       },
     },
     plugins: {
@@ -57,6 +58,11 @@ export default [
         project: './tsconfig.app.json',
         extraFileExtensions: ['.svelte'],
       },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        chrome: 'readonly',
+      },
     },
     plugins: {
       svelte: svelteEslint,
@@ -66,7 +72,28 @@ export default [
     rules: {
       ...sharedRules,
       ...svelteEslint.configs.recommended.rules,
+      // In Svelte 5 with runes, props destructuring needs 'let'
+      'prefer-const': 'off',
     },
+  },
+  {
+    files: ['**/*.test.ts', 'test/**/*.ts', 'vitest.config.ts'],
+    languageOptions: {
+      parser: tsParser,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        chrome: 'readonly',
+        global: 'readonly',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': typescriptEslint,
+      'simple-import-sort': simpleImportSort,
+    },
+    rules: sharedRules,
   },
   eslintConfigPrettier,
 ];
