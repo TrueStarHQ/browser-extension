@@ -27,6 +27,11 @@ export class RateLimiter {
 
     // Need to wait for the oldest request to expire
     const oldestRequest = this.requests[0];
+    if (oldestRequest === undefined) {
+      // This shouldn't happen, but handle it gracefully
+      this.requests.push(now);
+      return;
+    }
     const waitTime = this.windowMs - (now - oldestRequest);
 
     await new Promise((resolve) => setTimeout(resolve, waitTime));
