@@ -15,7 +15,7 @@
     onClose?: () => void;
   }
 
-  let { analysis, onClose }: Props = $props();
+  const { analysis, onClose }: Props = $props();
 
   const fakeScore = $derived(
     analysis.isFake
