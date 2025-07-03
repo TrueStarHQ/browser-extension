@@ -1,4 +1,4 @@
-import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RateLimiter } from './rate-limiter';
 
@@ -12,14 +12,14 @@ describe('RateLimiter', () => {
   });
 
   describe('constructor', () => {
-    it('should create a rate limiter with specified max requests and time window', () => {
+    it('creates a rate limiter with specified max requests and time window', () => {
       const limiter = new RateLimiter({ maxRequests: 5, windowMs: 1000 });
       expect(limiter).toBeDefined();
     });
   });
 
   describe('acquire', () => {
-    it('should allow requests up to the limit', async () => {
+    it('allows requests up to the limit', async () => {
       const limiter = new RateLimiter({ maxRequests: 3, windowMs: 1000 });
 
       const promises = [
@@ -34,7 +34,7 @@ describe('RateLimiter', () => {
       results.forEach((result) => expect(result).toBeUndefined());
     });
 
-    it('should delay requests that exceed the limit', async () => {
+    it('delays requests that exceed the limit', async () => {
       const limiter = new RateLimiter({ maxRequests: 2, windowMs: 1000 });
 
       // First two should be immediate
@@ -60,7 +60,7 @@ describe('RateLimiter', () => {
       expect(resolved).toBe(true);
     });
 
-    it('should reset the window after the time period', async () => {
+    it('resets the window after the time period', async () => {
       const limiter = new RateLimiter({ maxRequests: 2, windowMs: 1000 });
 
       // Use up the limit
@@ -79,7 +79,7 @@ describe('RateLimiter', () => {
       expect(elapsed).toBeLessThan(100);
     });
 
-    it('should handle concurrent requests properly', async () => {
+    it('handles concurrent requests properly', async () => {
       const limiter = new RateLimiter({ maxRequests: 3, windowMs: 1000 });
 
       // Make 5 concurrent requests
@@ -108,7 +108,7 @@ describe('RateLimiter', () => {
   });
 
   describe('executeWithLimit', () => {
-    it('should execute function after acquiring rate limit', async () => {
+    it('executes function after acquiring rate limit', async () => {
       const limiter = new RateLimiter({ maxRequests: 1, windowMs: 1000 });
       const mockFn = vi.fn().mockResolvedValue('result');
 
@@ -118,7 +118,7 @@ describe('RateLimiter', () => {
       expect(result).toBe('result');
     });
 
-    it('should propagate function errors', async () => {
+    it('propagates function errors', async () => {
       const limiter = new RateLimiter({ maxRequests: 1, windowMs: 1000 });
       const error = new Error('Function failed');
       const mockFn = vi.fn().mockRejectedValue(error);
@@ -129,7 +129,7 @@ describe('RateLimiter', () => {
       expect(mockFn).toHaveBeenCalledTimes(1);
     });
 
-    it('should apply rate limiting to function execution', async () => {
+    it('applies rate limiting to function execution', async () => {
       const limiter = new RateLimiter({ maxRequests: 2, windowMs: 1000 });
       let callCount = 0;
       const mockFn = vi.fn(() => Promise.resolve(++callCount));
