@@ -1,14 +1,25 @@
-import { tv } from 'tailwind-variants';
+import Root from './card.svelte';
+import Action from './card-action.svelte';
+import Content from './card-content.svelte';
+import Description from './card-description.svelte';
+import Footer from './card-footer.svelte';
+import Header from './card-header.svelte';
+import Title from './card-title.svelte';
 
-export { default as Card } from './card.svelte';
-export { default as CardContent } from './card-content.svelte';
-export { default as CardDescription } from './card-description.svelte';
-export { default as CardFooter } from './card-footer.svelte';
-export { default as CardHeader } from './card-header.svelte';
-export { default as CardTitle } from './card-title.svelte';
-
-export const cardVariants = tv({
-  base: 'rounded-lg border bg-card text-card-foreground shadow-sm',
-});
-
-export type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+export {
+  Action,
+  //
+  Root as Card,
+  Action as CardAction,
+  Content as CardContent,
+  Description as CardDescription,
+  Footer as CardFooter,
+  Header as CardHeader,
+  Title as CardTitle,
+  Content,
+  Description,
+  Footer,
+  Header,
+  Root,
+  Title,
+};
