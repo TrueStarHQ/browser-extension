@@ -50,13 +50,12 @@ export function parseReviewsFromHtml(html: string): ReviewData[] {
       const helpfulMatch = helpfulText.match(
         /(\d+)\s*(?:of\s*(\d+))?\s*people?\s*found/
       );
-      const helpfulVotes = helpfulMatch
+      const helpfulVotes = helpfulMatch?.[1]
         ? parseInt(helpfulMatch[1], 10)
         : undefined;
-      const totalVotes =
-        helpfulMatch && helpfulMatch[2]
-          ? parseInt(helpfulMatch[2], 10)
-          : undefined;
+      const totalVotes = helpfulMatch?.[2]
+        ? parseInt(helpfulMatch[2], 10)
+        : undefined;
 
       // Extract product variation (size/color)
       const variationEl = reviewEl.querySelector(
