@@ -8,7 +8,7 @@ import { fetchMultiplePages } from '../lib/amazon/page-fetcher';
 import { ReviewCache } from '../lib/amazon/review-cache';
 import { parseReviewsFromHtml } from '../lib/amazon/review-parser';
 import { selectPagesToFetch } from '../lib/amazon/review-sampling';
-import type { AnalysisResult,ReviewData } from '../services/truestar-api';
+import type { AnalysisResult, ReviewData } from '../services/truestar-api';
 import { truestarApi } from '../services/truestar-api';
 import { log } from '../utils/logger';
 import { mountComponent } from '../utils/mount-component';
@@ -16,9 +16,9 @@ import { mountComponent } from '../utils/mount-component';
 // Validation function for API response
 function isValidAnalysisResult(obj: unknown): obj is AnalysisResult {
   if (!obj || typeof obj !== 'object') return false;
-  
+
   const analysis = obj as Record<string, unknown>;
-  
+
   return (
     typeof analysis.isFake === 'boolean' &&
     typeof analysis.confidence === 'number' &&
@@ -155,7 +155,7 @@ class AmazonProductPageChecker {
 
       const result = await this.checkReviews(reviews);
       this.hideLoadingIndicator();
-      this.displayResults(result as Record<string, unknown>);
+      this.displayResults(result);
     } catch (error) {
       log.error('Error analyzing reviews:', error);
       this.hideLoadingIndicator();
@@ -199,14 +199,14 @@ class AmazonProductPageChecker {
         confidence: analysis.confidence,
         summary: analysis.summary,
         reasons: analysis.reasons,
-        flags: analysis.flags
+        flags: analysis.flags,
       },
       onClose: () => {
         if (this.analysisComponent) {
           this.analysisComponent.destroy();
           this.analysisComponent = null;
         }
-      }
+      },
     });
   }
 
@@ -223,14 +223,14 @@ class AmazonProductPageChecker {
         confidence: 0,
         summary: message,
         reasons: ['Unable to analyze reviews due to an error'],
-        flags: []
+        flags: [],
       },
       onClose: () => {
         if (this.analysisComponent) {
           this.analysisComponent.destroy();
           this.analysisComponent = null;
         }
-      }
+      },
     });
   }
 }
