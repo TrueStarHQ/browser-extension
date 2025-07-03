@@ -1,13 +1,13 @@
-import { ErrorReporter } from './error-reporter';
+import { SentryReporter } from './sentry-reporter';
 
 class Logger {
   private readonly prefix = 'TrueStar:';
-  private errorReporter: ErrorReporter | null = null;
+  private errorReporter: SentryReporter | null = null;
 
   constructor() {
     // Only create error reporter if DSN is available
     if (import.meta.env.VITE_SENTRY_DSN) {
-      this.errorReporter = new ErrorReporter(import.meta.env.VITE_SENTRY_DSN);
+      this.errorReporter = new SentryReporter(import.meta.env.VITE_SENTRY_DSN);
     }
   }
 

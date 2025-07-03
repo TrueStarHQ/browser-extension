@@ -2,14 +2,14 @@ import * as Sentry from '@sentry/svelte';
 
 import { preferencesManager } from './user-preferences';
 
-interface ErrorReport {
+interface SentryReport {
   message: string;
   level: 'error' | 'warning';
   context?: Record<string, unknown>;
   tags?: Record<string, string>;
 }
 
-export class ErrorReporter {
+export class SentryReporter {
   private isInitialized = false;
 
   constructor(private dsn: string) {
@@ -49,7 +49,7 @@ export class ErrorReporter {
     this.isInitialized = true;
   }
 
-  async report(error: ErrorReport): Promise<void> {
+  async report(error: SentryReport): Promise<void> {
     if (!preferencesManager.isErrorLoggingEnabled()) {
       return;
     }

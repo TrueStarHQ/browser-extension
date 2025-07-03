@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { log } from './logger';
 
-// Mock the error reporter module
-vi.mock('./error-reporter', () => ({
-  ErrorReporter: vi.fn().mockImplementation(() => ({
+// Mock the sentry reporter module
+vi.mock('./sentry-reporter', () => ({
+  SentryReporter: vi.fn().mockImplementation(() => ({
     reportError: vi.fn(),
   })),
 }));
