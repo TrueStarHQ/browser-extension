@@ -23,7 +23,7 @@ describe('Review Parser', () => {
       const reviews = parseReviewsFromHtml(html);
 
       expect(reviews).toHaveLength(1);
-      expect(reviews[0]).toEqual({
+      expect(reviews[0]!).toEqual({
         id: 'RQ1XFNZ96Y1ST',
         rating: 5,
         text: 'Great product! Works exactly as described.',
@@ -62,14 +62,14 @@ describe('Review Parser', () => {
       const reviews = parseReviewsFromHtml(html);
 
       expect(reviews).toHaveLength(2);
-      expect(reviews[0]).toEqual({
+      expect(reviews[0]!).toEqual({
         id: 'R2FGE3K2H5J3BV',
         rating: 4,
         text: 'Good product, but could be better.',
         author: 'Alice',
         verified: false,
       });
-      expect(reviews[1]).toEqual({
+      expect(reviews[1]!).toEqual({
         id: 'R3MRNXWE5378WB',
         rating: 1,
         text: 'Terrible quality!',
@@ -104,11 +104,11 @@ describe('Review Parser', () => {
       const expectedTimestamp = Date.now();
 
       expect(reviews).toHaveLength(1);
-      expect(reviews[0].id).toBe(`UNKNOWN_${expectedTimestamp}_0`);
-      expect(reviews[0].rating).toBe(3);
-      expect(reviews[0].text).toBe('Average product.');
-      expect(reviews[0].author).toBe('Charlie');
-      expect(reviews[0].verified).toBe(false);
+      expect(reviews[0]!.id).toBe(`UNKNOWN_${expectedTimestamp}_0`);
+      expect(reviews[0]!.rating).toBe(3);
+      expect(reviews[0]!.text).toBe('Average product.');
+      expect(reviews[0]!.author).toBe('Charlie');
+      expect(reviews[0]!.verified).toBe(false);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         'TrueStar: Review element missing ID attribute, using fallback:',
@@ -141,7 +141,7 @@ describe('Review Parser', () => {
       const reviews = parseReviewsFromHtml(html);
 
       expect(reviews).toHaveLength(1);
-      expect(reviews[0]).toEqual({
+      expect(reviews[0]!).toEqual({
         id: 'R1ABC123DEF456',
         rating: 5,
         text: 'Excellent quality and fast shipping!',
@@ -188,11 +188,11 @@ describe('Review Parser', () => {
       const reviews = parseReviewsFromHtml(html);
 
       expect(reviews).toHaveLength(2);
-      expect(reviews[0]).toMatchObject({
+      expect(reviews[0]!).toMatchObject({
         id: 'R2XYZ789GHI012',
         productVariation: 'Large',
       });
-      expect(reviews[1]).toMatchObject({
+      expect(reviews[1]!).toMatchObject({
         id: 'R3QRS345TUV678',
         productVariation: 'Blue',
       });
@@ -217,12 +217,12 @@ describe('Review Parser', () => {
       const reviews = parseReviewsFromHtml(html);
 
       expect(reviews).toHaveLength(1);
-      expect(reviews[0]).toMatchObject({
+      expect(reviews[0]!).toMatchObject({
         id: 'R4MNO901PQR234',
         helpfulVotes: 3,
         // totalVotes should be undefined when not present
       });
-      expect(reviews[0].totalVotes).toBeUndefined();
+      expect(reviews[0]!.totalVotes).toBeUndefined();
     });
 
     describe('edge cases', () => {
@@ -262,8 +262,8 @@ describe('Review Parser', () => {
 
         const reviews = parseReviewsFromHtml(html);
         expect(reviews).toHaveLength(1);
-        expect(reviews[0].author).toBe('José García-López');
-        expect(reviews[0].text).toBe(
+        expect(reviews[0]!.author).toBe('José García-López');
+        expect(reviews[0]!.text).toBe(
           'Great product! It\'s really "awesome" & works well with my setup <3. Cost was ~$50 (50% off!)'
         );
       });
@@ -286,8 +286,8 @@ describe('Review Parser', () => {
 
         const reviews = parseReviewsFromHtml(html);
         expect(reviews).toHaveLength(1);
-        expect(reviews[0].text).toBe(longText.trim());
-        expect(reviews[0].text.length).toBeGreaterThan(3000);
+        expect(reviews[0]!.text).toBe(longText.trim());
+        expect(reviews[0]!.text.length).toBeGreaterThan(3000);
       });
 
       it('should handle multi-paragraph reviews', () => {
@@ -311,9 +311,9 @@ describe('Review Parser', () => {
 
         const reviews = parseReviewsFromHtml(html);
         expect(reviews).toHaveLength(1);
-        expect(reviews[0].text).toContain('First paragraph');
-        expect(reviews[0].text).toContain('Second paragraph');
-        expect(reviews[0].text).toContain('Third paragraph');
+        expect(reviews[0]!.text).toContain('First paragraph');
+        expect(reviews[0]!.text).toContain('Second paragraph');
+        expect(reviews[0]!.text).toContain('Third paragraph');
       });
 
       it('should handle reviews with invalid ratings', () => {
@@ -352,7 +352,7 @@ describe('Review Parser', () => {
 
         const reviews = parseReviewsFromHtml(html);
         expect(reviews).toHaveLength(1);
-        expect(reviews[0].author).toBe('Anonymous');
+        expect(reviews[0]!.author).toBe('Anonymous');
       });
 
       it('should handle malformed HTML structure gracefully', () => {
@@ -395,8 +395,8 @@ describe('Review Parser', () => {
 
         const reviews = parseReviewsFromHtml(html);
         expect(reviews).toHaveLength(1);
-        expect(reviews[0].isVineReview).toBe(true);
-        expect(reviews[0].verified).toBe(false); // Vine reviews are not "verified purchases"
+        expect(reviews[0]!.isVineReview).toBe(true);
+        expect(reviews[0]!.verified).toBe(false); // Vine reviews are not "verified purchases"
       });
 
       it('should extract reviewer badges', () => {
@@ -420,7 +420,7 @@ describe('Review Parser', () => {
 
         const reviews = parseReviewsFromHtml(html);
         expect(reviews).toHaveLength(1);
-        expect(reviews[0].badges).toEqual([
+        expect(reviews[0]!.badges).toEqual([
           'Top 1000 Reviewer',
           'Hall of Fame',
         ]);
@@ -445,8 +445,8 @@ describe('Review Parser', () => {
 
         const reviews = parseReviewsFromHtml(html);
         expect(reviews).toHaveLength(1);
-        expect(reviews[0].verified).toBe(true);
-        expect(reviews[0].isVineReview).toBe(true);
+        expect(reviews[0]!.verified).toBe(true);
+        expect(reviews[0]!.isVineReview).toBe(true);
       });
 
       it('should handle multiple badges without duplicating standard badges', () => {
@@ -472,13 +472,13 @@ describe('Review Parser', () => {
 
         const reviews = parseReviewsFromHtml(html);
         expect(reviews).toHaveLength(1);
-        expect(reviews[0].verified).toBe(true);
-        expect(reviews[0].badges).toEqual([
+        expect(reviews[0]!.verified).toBe(true);
+        expect(reviews[0]!.badges).toEqual([
           'Top 500 Reviewer',
           'THE Hall of Famer',
         ]);
         // Should not include "Verified Purchase" in badges array
-        expect(reviews[0].badges).not.toContain('Verified Purchase');
+        expect(reviews[0]!.badges).not.toContain('Verified Purchase');
       });
 
       it('should handle early reviewer rewards badge', () => {
@@ -501,7 +501,7 @@ describe('Review Parser', () => {
 
         const reviews = parseReviewsFromHtml(html);
         expect(reviews).toHaveLength(1);
-        expect(reviews[0].badges).toEqual(['Early Reviewer Rewards']);
+        expect(reviews[0]!.badges).toEqual(['Early Reviewer Rewards']);
       });
     });
   });

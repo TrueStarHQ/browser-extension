@@ -17,19 +17,16 @@ describe('Logger', () => {
   };
 
   beforeEach(() => {
-    // Mock console methods
     consoleSpy = {
       info: vi.spyOn(console, 'info').mockImplementation(() => {}),
       warn: vi.spyOn(console, 'warn').mockImplementation(() => {}),
       error: vi.spyOn(console, 'error').mockImplementation(() => {}),
     };
 
-    // Clear all mocks
     vi.clearAllMocks();
   });
 
   afterEach(() => {
-    // Restore console methods
     consoleSpy.info.mockRestore();
     consoleSpy.warn.mockRestore();
     consoleSpy.error.mockRestore();

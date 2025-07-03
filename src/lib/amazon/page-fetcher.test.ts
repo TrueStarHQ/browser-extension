@@ -56,10 +56,10 @@ describe('Page Fetcher', () => {
       const results = await fetchMultiplePages(urls);
 
       expect(results).toHaveLength(3);
-      expect(results[0].url).toBe(urls[0]);
-      expect(results[0].html).toBe(mockResponses[urls[0]]);
-      expect(results[1].url).toBe(urls[1]);
-      expect(results[1].html).toBe(mockResponses[urls[1]]);
+      expect(results[0]!.url).toBe(urls[0]);
+      expect(results[0]!.html).toBe(mockResponses[urls[0]!]);
+      expect(results[1]!.url).toBe(urls[1]);
+      expect(results[1]!.html).toBe(mockResponses[urls[1]!]);
     });
   });
 });
