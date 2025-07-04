@@ -6,8 +6,12 @@ import { vi } from 'vitest';
 const chrome = {
   storage: {
     local: {
-      get: vi.fn(),
-      set: vi.fn(),
+      get: vi.fn((_keys: string[], callback: (result: Record<string, unknown>) => void) => {
+        callback({});
+      }),
+      set: vi.fn((_data: Record<string, unknown>, callback: () => void) => {
+        callback();
+      }),
       onChanged: {
         addListener: vi.fn(),
       },
@@ -23,5 +27,4 @@ Object.defineProperty(global, 'chrome', {
   writable: true,
 });
 
-// Export for use in tests
 export { chrome as mockChrome };

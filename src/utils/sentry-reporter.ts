@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/svelte';
 
-import { preferencesManager } from './user-preferences';
+import { preferences } from './user-preferences';
 
 interface SentryReport {
   message: string;
@@ -18,7 +18,7 @@ export class SentryReporter {
 
   private async checkAndInitialize(): Promise<void> {
     if (
-      !preferencesManager.isErrorLoggingEnabled() ||
+      !preferences.isErrorLoggingEnabled() ||
       this.isInitialized ||
       !this.dsn
     ) {
@@ -49,7 +49,7 @@ export class SentryReporter {
   }
 
   async report(error: SentryReport): Promise<void> {
-    if (!preferencesManager.isErrorLoggingEnabled()) {
+    if (!preferences.isErrorLoggingEnabled()) {
       return;
     }
 

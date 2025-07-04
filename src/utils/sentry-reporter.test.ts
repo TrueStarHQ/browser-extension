@@ -8,7 +8,7 @@ vi.mock('./user-preferences');
 
 import * as Sentry from '@sentry/svelte';
 
-import { preferencesManager } from './user-preferences';
+import { preferences } from './user-preferences';
 
 describe('SentryReporter', () => {
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('SentryReporter', () => {
 
   describe('when error logging is enabled', () => {
     beforeEach(() => {
-      vi.mocked(preferencesManager.isErrorLoggingEnabled).mockReturnValue(true);
+      vi.mocked(preferences.isErrorLoggingEnabled).mockReturnValue(true);
       vi.mocked(Sentry.captureException).mockImplementation(
         () => 'event-id' as any
       );
@@ -149,7 +149,7 @@ describe('SentryReporter', () => {
 
   describe('when error logging is disabled', () => {
     beforeEach(() => {
-      vi.mocked(preferencesManager.isErrorLoggingEnabled).mockReturnValue(
+      vi.mocked(preferences.isErrorLoggingEnabled).mockReturnValue(
         false
       );
       vi.mocked(Sentry.captureException).mockImplementation(
@@ -182,7 +182,7 @@ describe('SentryReporter', () => {
 
   describe('when DSN is not provided', () => {
     beforeEach(() => {
-      vi.mocked(preferencesManager.isErrorLoggingEnabled).mockReturnValue(true);
+      vi.mocked(preferences.isErrorLoggingEnabled).mockReturnValue(true);
       vi.mocked(Sentry.BrowserClient).mockImplementation(
         () => ({ init: vi.fn() }) as any
       );
@@ -197,7 +197,7 @@ describe('SentryReporter', () => {
 
   describe('convenience methods', () => {
     beforeEach(() => {
-      vi.mocked(preferencesManager.isErrorLoggingEnabled).mockReturnValue(true);
+      vi.mocked(preferences.isErrorLoggingEnabled).mockReturnValue(true);
       vi.mocked(Sentry.captureException).mockImplementation(
         () => 'event-id' as any
       );
@@ -296,7 +296,7 @@ describe('SentryReporter', () => {
 
   describe('initialization behavior', () => {
     beforeEach(() => {
-      vi.mocked(preferencesManager.isErrorLoggingEnabled).mockReturnValue(true);
+      vi.mocked(preferences.isErrorLoggingEnabled).mockReturnValue(true);
       vi.mocked(Sentry.getDefaultIntegrations).mockReturnValue([
         { name: 'BrowserApiErrors' },
         { name: 'Breadcrumbs' },
@@ -347,7 +347,7 @@ describe('SentryReporter', () => {
 
   describe('error handling', () => {
     beforeEach(() => {
-      vi.mocked(preferencesManager.isErrorLoggingEnabled).mockReturnValue(true);
+      vi.mocked(preferences.isErrorLoggingEnabled).mockReturnValue(true);
       // Mock the minimum needed for initialization
       vi.mocked(Sentry.getDefaultIntegrations).mockReturnValue([]);
       vi.mocked(Sentry.BrowserClient).mockImplementation(

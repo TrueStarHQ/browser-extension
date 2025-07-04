@@ -1,21 +1,21 @@
 <script lang="ts">
   import '../assets/app.css';
 
-  import { preferencesManager } from '../utils/user-preferences';
+  import { preferences } from '../utils/user-preferences';
 
   let errorReportingEnabled = $state(false);
   let loading = $state(true);
 
   $effect(() => {
     (async () => {
-      await preferencesManager.waitForLoad();
-      errorReportingEnabled = preferencesManager.isErrorLoggingEnabled();
+      await preferences.waitForLoad();
+      errorReportingEnabled = preferences.isErrorLoggingEnabled();
       loading = false;
     })();
   });
 
   function handleToggle() {
-    preferencesManager.setErrorLoggingEnabled(errorReportingEnabled);
+    preferences.setErrorLoggingEnabled(errorReportingEnabled);
   }
 </script>
 
