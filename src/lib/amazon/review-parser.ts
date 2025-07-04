@@ -2,7 +2,9 @@ import type { AmazonReview } from '@truestarhq/shared-types';
 
 import { log } from '$lib/utils/logger';
 
-import { generateFallbackId } from './review-id-generator';
+function parseHelpfulCount(value: string): number {
+  return value.toLowerCase() === 'one' ? 1 : parseInt(value, 10);
+}
 
 export function parseReviewsFromHtml(html: string): AmazonReview[] {
   const parser = new DOMParser();
@@ -13,20 +15,33 @@ export function parseReviewsFromHtml(html: string): AmazonReview[] {
 
   reviewElements.forEach((reviewEl, index) => {
     try {
-      let id = reviewEl.getAttribute('id');
+      const id = reviewEl.getAttribute('id');
       if (!id) {
-        id = generateFallbackId(index);
-        log.warn('Review element missing ID attribute, using fallback:', id);
+        log.warn('Review element missing ID attribute, skipping', {
+          author: reviewEl
+            .querySelector('.a-profile-name')
+            ?.textContent?.trim(),
+          text: reviewEl
+            .querySelector('[data-hook="review-body"]')
+            ?.textContent?.trim()
+            ?.substring(0, 50),
+        });
+        return;
       }
 
       const authorEl = reviewEl.querySelector('.a-profile-name');
       const author = authorEl?.textContent?.trim() || 'Anonymous';
 
-      const ratingEl = reviewEl.querySelector('.review-rating .a-icon-alt');
+      const ratingEl =
+        reviewEl.querySelector(
+          '[data-hook="review-star-rating"] .a-icon-alt'
+        ) || reviewEl.querySelector('.review-rating .a-icon-alt');
       const ratingText = ratingEl?.textContent || '';
       const rating = parseFloat(ratingText.match(/(\d\.?\d?)/)?.[1] || '0');
 
-      const textEl = reviewEl.querySelector('.review-text-content span');
+      const textEl =
+        reviewEl.querySelector('[data-hook="review-body"] span') ||
+        reviewEl.querySelector('.review-text-content span');
       const text = textEl?.textContent?.trim() || '';
 
       const verifiedEl = reviewEl.querySelector('[data-hook="avp-badge"]');
@@ -35,15 +50,15 @@ export function parseReviewsFromHtml(html: string): AmazonReview[] {
       const dateEl = reviewEl.querySelector('[data-hook="review-date"]');
       const date = dateEl?.textContent?.trim();
 
-      const helpfulEl = reviewEl.querySelector(
-        '[data-hook="helpful-statement"]'
-      );
+      const helpfulEl =
+        reviewEl.querySelector('[data-hook="helpful-vote-statement"]') ||
+        reviewEl.querySelector('[data-hook="helpful-statement"]');
       const helpfulText = helpfulEl?.textContent || '';
       const helpfulMatch = helpfulText.match(
-        /(\d+)\s*(?:of\s*(\d+))?\s*people?\s*found/
+        /(\d+|One)\s*(?:of\s*(\d+))?\s*(?:people?|person)\s*found/i
       );
       const helpfulVotes = helpfulMatch?.[1]
-        ? parseInt(helpfulMatch[1], 10)
+        ? parseHelpfulCount(helpfulMatch[1])
         : undefined;
       const totalVotes = helpfulMatch?.[2]
         ? parseInt(helpfulMatch[2], 10)

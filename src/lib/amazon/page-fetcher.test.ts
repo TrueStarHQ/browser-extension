@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { fetchMultiplePages, fetchReviewPage } from './page-fetcher';
 
-describe('Page fetcher', () => {
+describe('Amazon review page fetcher', () => {
   describe('fetchReviewPage', () => {
     it('fetches a review page and returns HTML', async () => {
       const mockHtml = '<html><body>Review page content</body></html>';

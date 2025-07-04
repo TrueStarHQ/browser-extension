@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { selectPagesToFetch } from './review-sampling';
 
-describe('Review sampling strategy', () => {
+describe('Amazon review sampling strategy', () => {
   describe('selectPagesToFetch', () => {
     it('returns all pages when total pages <= 8', () => {
       const totalPages = 5;
