@@ -7,7 +7,6 @@ import {
   generateReviewPageUrl,
 } from '../lib/amazon/amazon-pagination';
 import { fetchMultiplePages } from '../lib/amazon/page-fetcher';
-import { ReviewCache } from '../lib/amazon/review-cache';
 import { parseReviewsFromHtml } from '../lib/amazon/review-parser';
 import { selectPagesToFetch } from '../lib/amazon/review-sampling';
 import { truestarApi } from '../services/truestar-api';
@@ -32,12 +31,10 @@ function isValidAnalysisResult(obj: unknown): obj is ReviewChecker {
 }
 
 class AmazonProductPageChecker {
-  private reviewCache: ReviewCache;
   private loadingComponent: ReturnType<typeof mountComponent> | null = null;
   private analysisComponent: ReturnType<typeof mountComponent> | null = null;
 
   constructor() {
-    this.reviewCache = new ReviewCache({ ttlMinutes: 30 }); // Cache for 30 minutes
     this.init();
   }
 
@@ -69,14 +66,6 @@ class AmazonProductPageChecker {
     if (!productId) {
       log.error('Could not extract product ID');
       return this.extractReviews(); // Fallback to single page
-    }
-
-    const cachedReviews = this.reviewCache.get(productId);
-    if (cachedReviews) {
-      log.info(
-        `Using cached reviews for product ${productId} (${cachedReviews.length} reviews)`
-      );
-      return cachedReviews;
     }
 
     try {
@@ -118,10 +107,6 @@ class AmazonProductPageChecker {
       }
 
       log.info(`Total reviews extracted: ${allReviews.length}`);
-
-      this.reviewCache.set(productId, allReviews);
-      log.info(`Cached reviews for product ${productId}`);
-
       return allReviews;
     } catch (error) {
       log.error(
