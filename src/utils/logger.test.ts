@@ -33,13 +33,13 @@ describe('Logger', () => {
   });
 
   describe('info', () => {
-    it('should log info messages with TrueStar prefix', () => {
+    it('log info messages with TrueStar prefix', () => {
       log.info('Test message');
 
       expect(consoleSpy.info).toHaveBeenCalledWith('TrueStar: Test message');
     });
 
-    it('should pass additional arguments to console.info', () => {
+    it('pass additional arguments to console.info', () => {
       const obj = { test: 'data' };
       log.info('Test message', obj, 'extra');
 
@@ -52,13 +52,13 @@ describe('Logger', () => {
   });
 
   describe('warning', () => {
-    it('should log warning messages with TrueStar prefix', () => {
+    it('log warning messages with TrueStar prefix', () => {
       log.warn('Warning message');
 
       expect(consoleSpy.warn).toHaveBeenCalledWith('TrueStar: Warning message');
     });
 
-    it('should pass additional arguments to console.warn', () => {
+    it('pass additional arguments to console.warn', () => {
       const obj = { warning: 'data' };
       log.warn('Warning message', obj);
 
@@ -70,13 +70,13 @@ describe('Logger', () => {
   });
 
   describe('error', () => {
-    it('should log error messages with TrueStar prefix', () => {
+    it('log error messages with TrueStar prefix', () => {
       log.error('Error message');
 
       expect(consoleSpy.error).toHaveBeenCalledWith('TrueStar: Error message');
     });
 
-    it('should pass additional arguments to console.error', () => {
+    it('pass additional arguments to console.error', () => {
       const error = new Error('Test error');
       log.error('Error message', error, 'context');
 
@@ -89,7 +89,7 @@ describe('Logger', () => {
   });
 
   describe('error reporting integration', () => {
-    it('should log errors normally regardless of error reporter availability', () => {
+    it('log errors normally regardless of error reporter availability', () => {
       const error = new Error('Test error');
       log.error('Error occurred', error, 'context');
 
@@ -100,7 +100,7 @@ describe('Logger', () => {
       );
     });
 
-    it('should handle case when no Error object is passed', () => {
+    it('handle case when no Error object is passed', () => {
       log.error('Simple error message', 'string data', { context: 'object' });
 
       expect(consoleSpy.error).toHaveBeenCalledWith(
@@ -112,7 +112,7 @@ describe('Logger', () => {
   });
 
   describe('singleton behavior', () => {
-    it('should maintain consistent prefix across calls', () => {
+    it('maintain consistent prefix across calls', () => {
       log.info('First message');
       log.warn('Second message');
       log.error('Third message');

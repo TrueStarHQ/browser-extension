@@ -4,7 +4,7 @@ import { fetchMultiplePages, fetchReviewPage } from './page-fetcher';
 
 describe('Page Fetcher', () => {
   describe('fetchReviewPage', () => {
-    it('should fetch a review page and return HTML', async () => {
+    it('fetch a review page and return HTML', async () => {
       const mockHtml = '<html><body>Review page content</body></html>';
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -19,7 +19,7 @@ describe('Page Fetcher', () => {
       expect(global.fetch).toHaveBeenCalledWith(url);
     });
 
-    it('should throw error when fetch fails', async () => {
+    it('throw error when fetch fails', async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: false,
         status: 404,
@@ -35,7 +35,7 @@ describe('Page Fetcher', () => {
   });
 
   describe('fetchMultiplePages', () => {
-    it('should fetch multiple pages in parallel', async () => {
+    it('fetch multiple pages in parallel', async () => {
       const mockResponses: Record<string, string> = {
         'https://www.amazon.com/product-reviews/B08N5WRWNW?pageNumber=1':
           '<html>Page 1</html>',

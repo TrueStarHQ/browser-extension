@@ -17,7 +17,7 @@ describe('PreferencesManager', () => {
   });
 
   describe('initialization', () => {
-    it('should call chrome.storage.local.get on construction', () => {
+    it('call chrome.storage.local.get on construction', () => {
       // Mock storage before creating instance
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
@@ -35,7 +35,7 @@ describe('PreferencesManager', () => {
   });
 
   describe('waitForLoad', () => {
-    it('should resolve after successful storage load', async () => {
+    it('resolve after successful storage load', async () => {
       // Mock successful storage response
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
@@ -47,7 +47,7 @@ describe('PreferencesManager', () => {
       await expect(manager.waitForLoad()).resolves.toBeUndefined();
     });
 
-    it('should reject when chrome.storage.local.get fails', async () => {
+    it('reject when chrome.storage.local.get fails', async () => {
       // Mock storage error
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
@@ -62,7 +62,7 @@ describe('PreferencesManager', () => {
       );
     });
 
-    it('should use defaults when storage is empty', async () => {
+    it('use defaults when storage is empty', async () => {
       // Mock empty storage response
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
@@ -75,7 +75,7 @@ describe('PreferencesManager', () => {
       expect(manager.isErrorLoggingEnabled()).toBe(false);
     });
 
-    it('should use stored values when they exist', async () => {
+    it('use stored values when they exist', async () => {
       // Mock storage with stored value
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
@@ -90,7 +90,7 @@ describe('PreferencesManager', () => {
   });
 
   describe('setPreference', () => {
-    it('should update preference and save to storage', async () => {
+    it('update preference and save to storage', async () => {
       // Mock successful storage operations
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
@@ -117,7 +117,7 @@ describe('PreferencesManager', () => {
       );
     });
 
-    it('should revert in-memory change when storage fails', async () => {
+    it('revert in-memory change when storage fails', async () => {
       // Mock initial successful load, then storage failure
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
@@ -147,7 +147,7 @@ describe('PreferencesManager', () => {
       );
     });
 
-    it('should log error when storage fails', async () => {
+    it('log error when storage fails', async () => {
       const consoleSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});
@@ -180,7 +180,7 @@ describe('PreferencesManager', () => {
   });
 
   describe('getPreference', () => {
-    it('should return current preference value', async () => {
+    it('return current preference value', async () => {
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
           callback({ errorLoggingEnabled: true });
@@ -195,7 +195,7 @@ describe('PreferencesManager', () => {
       );
     });
 
-    it('should have correct TypeScript typing', async () => {
+    it('have correct TypeScript typing', async () => {
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
           callback({});
@@ -214,7 +214,7 @@ describe('PreferencesManager', () => {
   });
 
   describe('setErrorLoggingEnabled', () => {
-    it('should set error logging preference', async () => {
+    it('set error logging preference', async () => {
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
           callback({});
@@ -240,7 +240,7 @@ describe('PreferencesManager', () => {
   });
 
   describe('isErrorLoggingEnabled', () => {
-    it('should return false by default', async () => {
+    it('return false by default', async () => {
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
           callback({});
@@ -253,7 +253,7 @@ describe('PreferencesManager', () => {
       expect(preferencesManager.isErrorLoggingEnabled()).toBe(false);
     });
 
-    it('should return stored value when available', async () => {
+    it('return stored value when available', async () => {
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
           callback({ errorLoggingEnabled: true });
@@ -268,7 +268,7 @@ describe('PreferencesManager', () => {
   });
 
   describe('error handling edge cases', () => {
-    it('should handle undefined chrome.runtime.lastError gracefully', async () => {
+    it('handle undefined chrome.runtime.lastError gracefully', async () => {
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
           callback({});
@@ -290,7 +290,7 @@ describe('PreferencesManager', () => {
       }).not.toThrow();
     });
 
-    it('should handle null chrome.runtime.lastError gracefully', async () => {
+    it('handle null chrome.runtime.lastError gracefully', async () => {
       mockChrome.storage.local.get.mockImplementation(
         (_keys: string[], callback: StorageGetCallback) => {
           callback({});
@@ -320,11 +320,11 @@ describe('Exported preferencesManager singleton', () => {
     mockChrome.runtime.lastError = null;
   });
 
-  it('should be an instance of PreferencesManager', () => {
+  it('be an instance of PreferencesManager', () => {
     expect(preferencesManager).toBeInstanceOf(PreferencesManager);
   });
 
-  it('should have public methods available', () => {
+  it('have public methods available', () => {
     expect(typeof preferencesManager.waitForLoad).toBe('function');
     expect(typeof preferencesManager.setPreference).toBe('function');
     expect(typeof preferencesManager.getPreference).toBe('function');
@@ -332,7 +332,7 @@ describe('Exported preferencesManager singleton', () => {
     expect(typeof preferencesManager.setErrorLoggingEnabled).toBe('function');
   });
 
-  it('should maintain singleton behavior', async () => {
+  it('maintain singleton behavior', async () => {
     // Test that multiple imports return the same instance
     const module1 = await import('./user-preferences');
     const module2 = await import('./user-preferences');
@@ -347,7 +347,7 @@ describe('Concurrent operations', () => {
     mockChrome.runtime.lastError = null;
   });
 
-  it('should handle multiple setPreference calls correctly', async () => {
+  it('handle multiple setPreference calls correctly', async () => {
     mockChrome.storage.local.get.mockImplementation(
       (_keys: string[], callback: StorageGetCallback) => {
         callback({});
@@ -376,7 +376,7 @@ describe('Concurrent operations', () => {
     expect(setCallCount).toBe(3);
   });
 
-  it('should handle storage failures during concurrent operations', async () => {
+  it('handle storage failures during concurrent operations', async () => {
     mockChrome.storage.local.get.mockImplementation(
       (_keys: string[], callback: StorageGetCallback) => {
         callback({ errorLoggingEnabled: false });
@@ -414,7 +414,7 @@ describe('Generic preference system', () => {
     mockChrome.runtime.lastError = null;
   });
 
-  it('should support type-safe generic methods', async () => {
+  it('support type-safe generic methods', async () => {
     mockChrome.storage.local.get.mockImplementation(
       (_keys: string[], callback: StorageGetCallback) => {
         callback({});
@@ -444,7 +444,7 @@ describe('Storage corruption and invalid data', () => {
     mockChrome.runtime.lastError = null;
   });
 
-  it('should handle corrupted boolean preference data', async () => {
+  it('handle corrupted boolean preference data', async () => {
     mockChrome.storage.local.get.mockImplementation(
       (_keys: string[], callback: StorageGetCallback) => {
         callback({
@@ -461,7 +461,7 @@ describe('Storage corruption and invalid data', () => {
     expect(manager.getPreference('errorLoggingEnabled')).toBe('invalid_string');
   });
 
-  it('should handle null/undefined preference values', async () => {
+  it('handle null/undefined preference values', async () => {
     mockChrome.storage.local.get.mockImplementation(
       (_keys: string[], callback: StorageGetCallback) => {
         callback({
@@ -476,7 +476,7 @@ describe('Storage corruption and invalid data', () => {
     expect(manager.getPreference('errorLoggingEnabled')).toBe(null);
   });
 
-  it('should handle storage returning unexpected structure', async () => {
+  it('handle storage returning unexpected structure', async () => {
     mockChrome.storage.local.get.mockImplementation(
       (_keys: string[], callback: StorageGetCallback) => {
         // Return completely wrong structure
@@ -498,7 +498,7 @@ describe('Initialization race conditions', () => {
     mockChrome.runtime.lastError = null;
   });
 
-  it('should return default values before load completes', () => {
+  it('return default values before load completes', () => {
     // Don't call the callback immediately
     mockChrome.storage.local.get.mockImplementation(
       (_keys: string[], _callback: StorageGetCallback) => {
@@ -513,7 +513,7 @@ describe('Initialization race conditions', () => {
     expect(manager.getPreference('errorLoggingEnabled')).toBe(false);
   });
 
-  it('should handle setPreference before load completes', () => {
+  it('handle setPreference before load completes', () => {
     let storageCallback: (result: Record<string, unknown>) => void;
     mockChrome.storage.local.get.mockImplementation(
       (_keys: string[], callback: StorageGetCallback) => {
@@ -541,7 +541,7 @@ describe('Initialization race conditions', () => {
     expect(manager.getPreference('errorLoggingEnabled')).toBe(true);
   });
 
-  it('should prioritize loaded values over pre-load changes', async () => {
+  it('prioritize loaded values over pre-load changes', async () => {
     let storageCallback: (result: Record<string, unknown>) => void;
     mockChrome.storage.local.get.mockImplementation(
       (_keys: string[], callback: StorageGetCallback) => {

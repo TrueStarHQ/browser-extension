@@ -1,10 +1,10 @@
-import { describe, expect,it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { selectPagesToFetch } from './review-sampling';
 
 describe('Review Sampling Strategy', () => {
   describe('selectPagesToFetch', () => {
-    it('should return all pages when total pages <= 8', () => {
+    it('return all pages when total pages <= 8', () => {
       const totalPages = 5;
 
       const pages = selectPagesToFetch(totalPages);
@@ -12,7 +12,7 @@ describe('Review Sampling Strategy', () => {
       expect(pages).toEqual([1, 2, 3, 4, 5]);
     });
 
-    it('should sample pages when total pages > 8: first 5, last 3', () => {
+    it('sample pages when total pages > 8: first 5, last 3', () => {
       const totalPages = 20;
 
       const pages = selectPagesToFetch(totalPages);
@@ -29,7 +29,7 @@ describe('Review Sampling Strategy', () => {
       expect(pages.length).toBe(8);
     });
 
-    it('should include middle samples for very large page counts', () => {
+    it('include middle samples for very large page counts', () => {
       const totalPages = 100;
 
       const pages = selectPagesToFetch(totalPages);

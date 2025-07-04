@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import AnalysisPanel from './AnalysisPanel.svelte';
 
 describe('AnalysisPanel', () => {
-  it('should render the component', () => {
+  it('renders the component', () => {
     const { container } = render(AnalysisPanel, {
       props: {
         analysis: {
@@ -20,7 +20,7 @@ describe('AnalysisPanel', () => {
     expect(container.querySelector('#truestar-panel')).toBeTruthy();
   });
 
-  it('should display fake review score correctly', () => {
+  it('displays fake review score correctly', () => {
     const { getByText } = render(AnalysisPanel, {
       props: {
         analysis: {
@@ -36,7 +36,7 @@ describe('AnalysisPanel', () => {
     expect(getByText('85%')).toBeTruthy();
   });
 
-  it('should display confidence level', () => {
+  it('display confidence level', () => {
     const { getByText } = render(AnalysisPanel, {
       props: {
         analysis: {
@@ -52,7 +52,7 @@ describe('AnalysisPanel', () => {
     expect(getByText(/Confidence: 85%/)).toBeTruthy();
   });
 
-  it('should display summary', () => {
+  it('display summary', () => {
     const { getByText } = render(AnalysisPanel, {
       props: {
         analysis: {
@@ -70,7 +70,7 @@ describe('AnalysisPanel', () => {
     ).toBeTruthy();
   });
 
-  it('should call onClose when close button is clicked', () => {
+  it('call onClose when close button is clicked', () => {
     const onClose = vi.fn();
     const { getByRole } = render(AnalysisPanel, {
       props: {
@@ -92,7 +92,7 @@ describe('AnalysisPanel', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle null summary gracefully', () => {
+    it('handle null summary gracefully', () => {
       const { getByText } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -108,7 +108,7 @@ describe('AnalysisPanel', () => {
       expect(getByText('No analysis available')).toBeTruthy();
     });
 
-    it('should handle undefined summary gracefully', () => {
+    it('handle undefined summary gracefully', () => {
       const { getByText } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -124,7 +124,7 @@ describe('AnalysisPanel', () => {
       expect(getByText('No analysis available')).toBeTruthy();
     });
 
-    it('should handle empty string summary', () => {
+    it('handle empty string summary', () => {
       const { getByText } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -140,7 +140,7 @@ describe('AnalysisPanel', () => {
       expect(getByText('No analysis available')).toBeTruthy();
     });
 
-    it('should handle missing reasons array', () => {
+    it('handle missing reasons array', () => {
       const { container } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -157,7 +157,7 @@ describe('AnalysisPanel', () => {
       expect(container.querySelector('details')).toBeFalsy();
     });
 
-    it('should handle missing flags array', () => {
+    it('handle missing flags array', () => {
       const { container } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -174,7 +174,7 @@ describe('AnalysisPanel', () => {
       expect(container.querySelector('details')).toBeFalsy();
     });
 
-    it('should display red flags when both arrays have items', () => {
+    it('display red flags when both arrays have items', () => {
       const { getByText, getAllByRole } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -192,7 +192,7 @@ describe('AnalysisPanel', () => {
       expect(listItems.length).toBe(4);
     });
 
-    it('should handle confidence value of 0', () => {
+    it('handle confidence value of 0', () => {
       const { getByText } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -209,7 +209,7 @@ describe('AnalysisPanel', () => {
       expect(getByText('Confidence: 0%')).toBeTruthy();
     });
 
-    it('should handle confidence value of 1', () => {
+    it('handle confidence value of 1', () => {
       const { getByText } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -226,7 +226,7 @@ describe('AnalysisPanel', () => {
       expect(getByText('Confidence: 100%')).toBeTruthy();
     });
 
-    it('should not render close button when onClose is not provided', () => {
+    it('not render close button when onClose is not provided', () => {
       const { queryByRole } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -243,7 +243,7 @@ describe('AnalysisPanel', () => {
       expect(closeButton).toBeFalsy();
     });
 
-    it('should handle arrays with empty strings', () => {
+    it('handle arrays with empty strings', () => {
       const { getAllByRole } = render(AnalysisPanel, {
         props: {
           analysis: {

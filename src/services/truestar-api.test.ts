@@ -43,7 +43,7 @@ describe('TrueStarApi', () => {
   });
 
   describe('initialization', () => {
-    it('should be properly instantiated', () => {
+    it('be properly instantiated', () => {
       expect(truestarApi).toBeDefined();
       expect(typeof truestarApi.analyzeReviews).toBe('function');
     });
@@ -67,7 +67,7 @@ describe('TrueStarApi', () => {
       },
     ];
 
-    it('should successfully analyze reviews and return result', async () => {
+    it('successfully analyze reviews and return result', async () => {
       const mockApiResponse = {
         result: mockSuccessResponse,
       };
@@ -94,7 +94,7 @@ describe('TrueStarApi', () => {
       expect(result).toEqual(mockSuccessResponse);
     });
 
-    it('should use correct API endpoint', async () => {
+    it('use correct API endpoint', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -109,7 +109,7 @@ describe('TrueStarApi', () => {
       );
     });
 
-    it('should handle HTTP error responses', async () => {
+    it('handle HTTP error responses', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: false,
         status: 500,
@@ -132,7 +132,7 @@ describe('TrueStarApi', () => {
       });
     });
 
-    it('should handle network errors', async () => {
+    it('handle network errors', async () => {
       const networkError = new Error('Network error');
       fetchMock.mockRejectedValueOnce(networkError);
 
@@ -152,7 +152,7 @@ describe('TrueStarApi', () => {
       });
     });
 
-    it('should handle JSON parsing errors', async () => {
+    it('handle JSON parsing errors', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -175,7 +175,7 @@ describe('TrueStarApi', () => {
       });
     });
 
-    it('should handle different HTTP error status codes', async () => {
+    it('handle different HTTP error status codes', async () => {
       const testCases = [
         { status: 400, statusText: 'Bad Request' },
         { status: 401, statusText: 'Unauthorized' },
@@ -206,7 +206,7 @@ describe('TrueStarApi', () => {
       }
     });
 
-    it('should handle empty reviews array', async () => {
+    it('handle empty reviews array', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -225,7 +225,7 @@ describe('TrueStarApi', () => {
       expect(result).toEqual(mockSuccessResponse);
     });
 
-    it('should handle large review datasets', async () => {
+    it('handle large review datasets', async () => {
       const largeReviewSet: ReviewData[] = Array.from(
         { length: 100 },
         (_, i) => ({
@@ -255,7 +255,7 @@ describe('TrueStarApi', () => {
       expect(result).toEqual(mockSuccessResponse);
     });
 
-    it('should handle response with missing result field', async () => {
+    it('handle response with missing result field', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -268,7 +268,7 @@ describe('TrueStarApi', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should handle malformed API response structure', async () => {
+    it('handle malformed API response structure', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -290,7 +290,7 @@ describe('TrueStarApi', () => {
       });
     });
 
-    it('should warn when payload exceeds size limit', async () => {
+    it('warn when payload exceeds size limit', async () => {
       // Create a very large review set that exceeds 1MB
       const veryLargeReviewSet: ReviewData[] = Array.from(
         { length: 5000 },
@@ -323,14 +323,14 @@ describe('TrueStarApi', () => {
   });
 
   describe('singleton behavior', () => {
-    it('should export a consistent API instance', () => {
+    it('export a consistent API instance', () => {
       expect(truestarApi).toBeDefined();
       expect(typeof truestarApi.analyzeReviews).toBe('function');
     });
   });
 
   describe('type safety', () => {
-    it('should accept properly typed ReviewData', async () => {
+    it('accept properly typed ReviewData', async () => {
       const validReview: ReviewData = {
         id: 'RVALIDTEST123',
         rating: 4.5,

@@ -4,7 +4,7 @@ import { parseReviewsFromHtml } from './review-parser';
 
 describe('Review Parser', () => {
   describe('parseReviewsFromHtml', () => {
-    it('should extract reviews from Amazon review page HTML', () => {
+    it('extract reviews from Amazon review page HTML', () => {
       const html = `
         <div id="RQ1XFNZ96Y1ST" data-hook="review" class="review">
           <div class="a-profile-content">
@@ -32,7 +32,7 @@ describe('Review Parser', () => {
       });
     });
 
-    it('should parse multiple reviews from HTML', () => {
+    it('parse multiple reviews from HTML', () => {
       const html = `
         <div id="R2FGE3K2H5J3BV" data-hook="review" class="review">
           <div class="a-profile-content">
@@ -78,7 +78,7 @@ describe('Review Parser', () => {
       });
     });
 
-    it('should generate fallback ID when review element has no ID', () => {
+    it('generate fallback ID when review element has no ID', () => {
       // Mock Date.now() and console.warn
       vi.useFakeTimers();
       vi.setSystemTime(new Date('2025-06-26T10:30:00Z'));
@@ -120,7 +120,7 @@ describe('Review Parser', () => {
       vi.useRealTimers();
     });
 
-    it('should extract review metadata including dates and helpful votes', () => {
+    it('extract review metadata including dates and helpful votes', () => {
       const html = `
         <div id="R1ABC123DEF456" data-hook="review" class="review">
           <div class="a-profile-content">
@@ -153,7 +153,7 @@ describe('Review Parser', () => {
       });
     });
 
-    it('should extract product variation information', () => {
+    it('extract product variation information', () => {
       const html = `
         <div id="R2XYZ789GHI012" data-hook="review" class="review">
           <div class="a-profile-content">
@@ -198,7 +198,7 @@ describe('Review Parser', () => {
       });
     });
 
-    it('should handle reviews with partial helpful vote information', () => {
+    it('handle reviews with partial helpful vote information', () => {
       const html = `
         <div id="R4MNO901PQR234" data-hook="review" class="review">
           <div class="a-profile-content">
@@ -226,7 +226,7 @@ describe('Review Parser', () => {
     });
 
     describe('edge cases', () => {
-      it('should handle reviews with empty text content', () => {
+      it('handle reviews with empty text content', () => {
         const html = `
           <div id="R5EMPTY001" data-hook="review" class="review">
             <div class="a-profile-content">
@@ -245,7 +245,7 @@ describe('Review Parser', () => {
         expect(reviews).toHaveLength(0); // Should skip reviews without text
       });
 
-      it('should handle reviews with special characters and HTML entities', () => {
+      it('handle reviews with special characters and HTML entities', () => {
         const html = `
           <div id="R6SPECIAL002" data-hook="review" class="review">
             <div class="a-profile-content">
@@ -268,7 +268,7 @@ describe('Review Parser', () => {
         );
       });
 
-      it('should handle very long review text', () => {
+      it('handle very long review text', () => {
         const longText = 'This is an extremely detailed review. '.repeat(100);
         const html = `
           <div id="R7LONG003" data-hook="review" class="review">
@@ -290,7 +290,7 @@ describe('Review Parser', () => {
         expect(reviews[0]!.text.length).toBeGreaterThan(3000);
       });
 
-      it('should handle multi-paragraph reviews', () => {
+      it('handle multi-paragraph reviews', () => {
         const html = `
           <div id="R8MULTI004" data-hook="review" class="review">
             <div class="a-profile-content">
@@ -316,7 +316,7 @@ describe('Review Parser', () => {
         expect(reviews[0]!.text).toContain('Third paragraph');
       });
 
-      it('should handle reviews with invalid ratings', () => {
+      it('handle reviews with invalid ratings', () => {
         const html = `
           <div id="R9BADRATING005" data-hook="review" class="review">
             <div class="a-profile-content">
@@ -335,7 +335,7 @@ describe('Review Parser', () => {
         expect(reviews).toHaveLength(0); // Should skip reviews with invalid ratings
       });
 
-      it('should handle reviews with missing author names', () => {
+      it('handle reviews with missing author names', () => {
         const html = `
           <div id="R10NOAUTHOR006" data-hook="review" class="review">
             <div class="a-profile-content">
@@ -355,7 +355,7 @@ describe('Review Parser', () => {
         expect(reviews[0]!.author).toBe('Anonymous');
       });
 
-      it('should handle malformed HTML structure gracefully', () => {
+      it('handle malformed HTML structure gracefully', () => {
         const html = `
           <div id="R11MALFORMED007" data-hook="review" class="review">
             <!-- Missing profile content wrapper -->
@@ -377,7 +377,7 @@ describe('Review Parser', () => {
     });
 
     describe('special review types', () => {
-      it('should detect Vine reviews', () => {
+      it('detect Vine reviews', () => {
         const html = `
           <div id="RVINE001" data-hook="review" class="review">
             <div class="a-profile-content">
@@ -399,7 +399,7 @@ describe('Review Parser', () => {
         expect(reviews[0]!.verified).toBe(false); // Vine reviews are not "verified purchases"
       });
 
-      it('should extract reviewer badges', () => {
+      it('extract reviewer badges', () => {
         const html = `
           <div id="RBADGE001" data-hook="review" class="review">
             <div class="a-profile-content">
@@ -426,7 +426,7 @@ describe('Review Parser', () => {
         ]);
       });
 
-      it('should handle reviews with both Vine and verified purchase badges', () => {
+      it('handle reviews with both Vine and verified purchase badges', () => {
         const html = `
           <div id="RBOTH001" data-hook="review" class="review">
             <div class="a-profile-content">
@@ -449,7 +449,7 @@ describe('Review Parser', () => {
         expect(reviews[0]!.isVineReview).toBe(true);
       });
 
-      it('should handle multiple badges without duplicating standard badges', () => {
+      it('handle multiple badges without duplicating standard badges', () => {
         const html = `
           <div id="RMULTI001" data-hook="review" class="review">
             <div class="a-profile-content">
@@ -481,7 +481,7 @@ describe('Review Parser', () => {
         expect(reviews[0]!.badges).not.toContain('Verified Purchase');
       });
 
-      it('should handle early reviewer rewards badge', () => {
+      it('handle early reviewer rewards badge', () => {
         const html = `
           <div id="REARLY001" data-hook="review" class="review">
             <div class="a-profile-content">

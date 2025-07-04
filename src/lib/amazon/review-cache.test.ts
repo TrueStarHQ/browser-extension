@@ -17,7 +17,7 @@ describe('ReviewCache', () => {
   });
 
   describe('set and get', () => {
-    it('should store and retrieve reviews by product ID', () => {
+    it('store and retrieve reviews by product ID', () => {
       const productId = 'B08N5WRWNW';
       const reviews: ReviewData[] = [
         {
@@ -35,12 +35,12 @@ describe('ReviewCache', () => {
       expect(retrieved).toEqual(reviews);
     });
 
-    it('should return null for non-existent product ID', () => {
+    it('return null for non-existent product ID', () => {
       const result = cache.get('NONEXISTENT');
       expect(result).toBeNull();
     });
 
-    it('should overwrite existing cache entry', () => {
+    it('overwrite existing cache entry', () => {
       const productId = 'B08N5WRWNW';
       const reviews1: ReviewData[] = [
         {
@@ -69,7 +69,7 @@ describe('ReviewCache', () => {
   });
 
   describe('expiration', () => {
-    it('should return null for expired entries', () => {
+    it('return null for expired entries', () => {
       const productId = 'B08N5WRWNW';
       const reviews: ReviewData[] = [
         {
@@ -89,7 +89,7 @@ describe('ReviewCache', () => {
       expect(cache.get(productId)).toBeNull();
     });
 
-    it('should respect custom TTL', () => {
+    it('respect custom TTL', () => {
       const customCache = new ReviewCache({ ttlMinutes: 30 });
       const productId = 'B08N5WRWNW';
       const reviews: ReviewData[] = [
@@ -115,18 +115,18 @@ describe('ReviewCache', () => {
   });
 
   describe('has method', () => {
-    it('should return true for existing valid entries', () => {
+    it('return true for existing valid entries', () => {
       const productId = 'B08N5WRWNW';
       cache.set(productId, []);
 
       expect(cache.has(productId)).toBe(true);
     });
 
-    it('should return false for non-existent entries', () => {
+    it('return false for non-existent entries', () => {
       expect(cache.has('NONEXISTENT')).toBe(false);
     });
 
-    it('should return false for expired entries', () => {
+    it('return false for expired entries', () => {
       const productId = 'B08N5WRWNW';
       cache.set(productId, []);
 
@@ -137,7 +137,7 @@ describe('ReviewCache', () => {
   });
 
   describe('clear method', () => {
-    it('should remove all entries', () => {
+    it('remove all entries', () => {
       cache.set('PRODUCT1', []);
       cache.set('PRODUCT2', []);
       cache.set('PRODUCT3', []);
@@ -155,7 +155,7 @@ describe('ReviewCache', () => {
   });
 
   describe('delete method', () => {
-    it('should remove specific entry', () => {
+    it('remove specific entry', () => {
       cache.set('PRODUCT1', []);
       cache.set('PRODUCT2', []);
 
@@ -167,7 +167,7 @@ describe('ReviewCache', () => {
   });
 
   describe('getStats method', () => {
-    it('should return cache statistics', () => {
+    it('return cache statistics', () => {
       const reviews1: ReviewData[] = [
         {
           id: 'R1',
@@ -205,7 +205,7 @@ describe('ReviewCache', () => {
       expect(stats.newestEntry).toBeInstanceOf(Date);
     });
 
-    it('should handle empty cache stats', () => {
+    it('handle empty cache stats', () => {
       const stats = cache.getStats();
 
       expect(stats.entries).toBe(0);

@@ -4,7 +4,7 @@ import { retryWithBackoff } from './retry-helper';
 
 describe('Retry Helper', () => {
   describe('retryWithBackoff', () => {
-    it('should succeed on first try if function succeeds', async () => {
+    it('succeed on first try if function succeeds', async () => {
       const mockFn = vi.fn().mockResolvedValue('success');
 
       const result = await retryWithBackoff(mockFn);
@@ -13,7 +13,7 @@ describe('Retry Helper', () => {
       expect(mockFn).toHaveBeenCalledTimes(1);
     });
 
-    it('should retry on failure and eventually succeed', async () => {
+    it('retry on failure and eventually succeed', async () => {
       const mockFn = vi
         .fn()
         .mockRejectedValueOnce(new Error('First failure'))
@@ -26,7 +26,7 @@ describe('Retry Helper', () => {
       expect(mockFn).toHaveBeenCalledTimes(3);
     });
 
-    it('should throw after max retries exceeded', async () => {
+    it('throw after max retries exceeded', async () => {
       const mockFn = vi.fn().mockRejectedValue(new Error('Always fails'));
 
       await expect(retryWithBackoff(mockFn, { maxRetries: 2 })).rejects.toThrow(
@@ -36,7 +36,7 @@ describe('Retry Helper', () => {
       expect(mockFn).toHaveBeenCalledTimes(3); // Initial + 2 retries
     });
 
-    it('should use exponential backoff delays', async () => {
+    it('use exponential backoff delays', async () => {
       vi.useFakeTimers();
 
       const mockFn = vi
@@ -68,7 +68,7 @@ describe('Retry Helper', () => {
       vi.useRealTimers();
     });
 
-    it('should respect max delay', async () => {
+    it('respect max delay', async () => {
       vi.useFakeTimers();
 
       const mockFn = vi
@@ -107,7 +107,7 @@ describe('Retry Helper', () => {
       vi.useRealTimers();
     });
 
-    it('should allow custom shouldRetry function', async () => {
+    it('allow custom shouldRetry function', async () => {
       const retryableError = new Error('Retry this');
       const nonRetryableError = new Error('Do not retry');
 

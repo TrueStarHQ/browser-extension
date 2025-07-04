@@ -30,7 +30,7 @@ describe('mountComponent', () => {
     document.body.innerHTML = '';
   });
 
-  it('should create and mount a component with default container', () => {
+  it('create and mount a component with default container', () => {
     const props = { test: 'value' };
     const result = mountComponent(TestComponent, props);
 
@@ -54,7 +54,7 @@ describe('mountComponent', () => {
     expect(typeof result.destroy).toBe('function');
   });
 
-  it('should use provided target element', () => {
+  it('use provided target element', () => {
     const targetElement = document.createElement('div');
     document.body.appendChild(targetElement);
 
@@ -69,7 +69,7 @@ describe('mountComponent', () => {
     expect(targetElement.shadowRoot).toBeTruthy();
   });
 
-  it('should inject styles into shadow DOM', () => {
+  it('inject styles into shadow DOM', () => {
     const props = { test: 'value' };
     mountComponent(TestComponent, props);
 
@@ -82,7 +82,7 @@ describe('mountComponent', () => {
     expect(styleElement.textContent).toBe('mocked styles');
   });
 
-  it('should properly destroy component and clean up', () => {
+  it('properly destroy component and clean up', () => {
     const props = { test: 'value' };
     const result = mountComponent(TestComponent, props);
 
@@ -99,7 +99,7 @@ describe('mountComponent', () => {
     expect(document.body.children.length).toBe(0);
   });
 
-  it('should not remove custom target on destroy', () => {
+  it('not remove custom target on destroy', () => {
     const targetElement = document.createElement('div');
     document.body.appendChild(targetElement);
 
@@ -114,7 +114,7 @@ describe('mountComponent', () => {
     expect(document.body.children[0]).toBe(targetElement);
   });
 
-  it('should handle browsers that do not support shadow DOM', () => {
+  it('handle browsers that do not support shadow DOM', () => {
     // Create container element without attachShadow
     const container = document.createElement('div');
     Object.defineProperty(container, 'attachShadow', {
@@ -147,7 +147,7 @@ describe('mountComponent', () => {
     container.remove();
   });
 
-  it('should properly clean up style element on destroy', () => {
+  it('properly clean up style element on destroy', () => {
     const props = { test: 'value' };
     const result = mountComponent(TestComponent, props);
 
