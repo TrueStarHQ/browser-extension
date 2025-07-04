@@ -5,7 +5,6 @@ class Logger {
   private errorReporter: SentryReporter | null = null;
 
   constructor() {
-    // Only create error reporter if DSN is available
     if (import.meta.env.VITE_SENTRY_DSN) {
       this.errorReporter = new SentryReporter(import.meta.env.VITE_SENTRY_DSN);
     }
@@ -22,7 +21,6 @@ class Logger {
   error(message: string, ...args: unknown[]): void {
     console.error(`${this.prefix} ${message}`, ...args);
 
-    // Report errors to error reporter (Sentry) if available
     if (this.errorReporter) {
       const errorArg = args.find((arg) => arg instanceof Error);
       this.errorReporter.reportError(message, errorArg, { args });

@@ -16,19 +16,15 @@ export class RateLimiter {
   async acquire(): Promise<void> {
     const now = Date.now();
 
-    // Remove old requests outside the window
     this.requests = this.requests.filter((time) => now - time < this.windowMs);
 
     if (this.requests.length < this.maxRequests) {
-      // We can make a request immediately
       this.requests.push(now);
       return;
     }
 
-    // Need to wait for the oldest request to expire
     const oldestRequest = this.requests[0];
     if (oldestRequest === undefined) {
-      // This shouldn't happen, but handle it gracefully
       this.requests.push(now);
       return;
     }
@@ -36,7 +32,6 @@ export class RateLimiter {
 
     await new Promise((resolve) => setTimeout(resolve, waitTime));
 
-    // After waiting, try again
     return this.acquire();
   }
 

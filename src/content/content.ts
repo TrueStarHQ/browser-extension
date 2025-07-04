@@ -60,7 +60,6 @@ class AmazonProductPageChecker {
   }
 
   private extractReviews(): ReviewData[] {
-    // Use the centralized parser to extract reviews from current page
     return parseReviewsFromHtml(document.documentElement.innerHTML);
   }
 
@@ -71,7 +70,6 @@ class AmazonProductPageChecker {
       return this.extractReviews(); // Fallback to single page
     }
 
-    // Check cache first
     const cachedReviews = this.reviewCache.get(productId);
     if (cachedReviews) {
       log.info(
@@ -81,11 +79,9 @@ class AmazonProductPageChecker {
     }
 
     try {
-      // First, get the reviews from the current page
       const currentPageReviews = this.extractReviews();
       log.info(`Found ${currentPageReviews.length} reviews on current page`);
 
-      // Analyze pagination info
       const paginationInfo = analyzeReviewPagination(
         document.documentElement.innerHTML
       );
@@ -97,7 +93,6 @@ class AmazonProductPageChecker {
         return currentPageReviews;
       }
 
-      // Determine which pages to fetch
       const pagesToFetch = selectPagesToFetch(paginationInfo.totalPages);
       log.info(
         `Will fetch ${pagesToFetch.length} pages: ${pagesToFetch.join(', ')}`
@@ -108,10 +103,8 @@ class AmazonProductPageChecker {
         .filter((pageNum) => pageNum !== 1) // Skip page 1 as we already have it
         .map((pageNum) => generateReviewPageUrl(productId, pageNum));
 
-      // Fetch pages in parallel
       const fetchedPages = await fetchMultiplePages(urls);
 
-      // Parse reviews from fetched pages
       const allReviews = [...currentPageReviews];
       for (const page of fetchedPages) {
         if (!page.error && page.html) {
@@ -125,7 +118,6 @@ class AmazonProductPageChecker {
 
       log.info(`Total reviews extracted: ${allReviews.length}`);
 
-      // Cache the results
       this.reviewCache.set(productId, allReviews);
       log.info(`Cached reviews for product ${productId}`);
 
@@ -141,7 +133,6 @@ class AmazonProductPageChecker {
 
   private async analyzeReviews() {
     try {
-      // Show loading indicator
       this.showLoadingIndicator();
 
       const reviews = await this.extractMultiPageReviews();
@@ -179,20 +170,16 @@ class AmazonProductPageChecker {
   }
 
   private displayResults(analysis: unknown) {
-    // Validate the analysis response
     if (!isValidAnalysisResult(analysis)) {
       log.error('Invalid analysis result received:', analysis);
-      // Display error state
       this.displayError('Invalid analysis response received');
       return;
     }
 
-    // Remove any existing panel
     if (this.analysisComponent) {
       this.analysisComponent.destroy();
     }
 
-    // Mount the new analysis panel with validated data
     this.analysisComponent = mountComponent(AnalysisPanel, {
       analysis: {
         isFake: analysis.isFake,
@@ -211,12 +198,10 @@ class AmazonProductPageChecker {
   }
 
   private displayError(message: string) {
-    // Remove any existing panels
     if (this.analysisComponent) {
       this.analysisComponent.destroy();
     }
 
-    // Display error state using AnalysisPanel with error data
     this.analysisComponent = mountComponent(AnalysisPanel, {
       analysis: {
         isFake: false,

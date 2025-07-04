@@ -25,7 +25,6 @@ export class SentryReporter {
       return;
     }
 
-    // Filter out integrations that pollute global state
     const integrations = Sentry.getDefaultIntegrations({}).filter(
       (integration) =>
         !['BrowserApiErrors', 'Breadcrumbs', 'GlobalHandlers'].includes(
@@ -54,7 +53,6 @@ export class SentryReporter {
       return;
     }
 
-    // Ensure Sentry is initialized
     await this.checkAndInitialize();
 
     Sentry.captureException(new Error(error.message), {

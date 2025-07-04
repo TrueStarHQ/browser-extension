@@ -24,15 +24,12 @@ export async function retryWithBackoff<T>(
     } catch (error) {
       lastError = error as Error;
 
-      // Check if we should retry
       if (attempt === maxRetries || !shouldRetry(lastError)) {
         throw lastError;
       }
 
-      // Calculate delay with exponential backoff
       const delay = Math.min(initialDelay * Math.pow(2, attempt), maxDelay);
 
-      // Wait before retrying
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }

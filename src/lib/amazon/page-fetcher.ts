@@ -7,7 +7,6 @@ export interface PageResult {
   error?: Error;
 }
 
-// Rate limiter: max 5 requests per second to avoid overwhelming Amazon
 const rateLimiter = new RateLimiter({
   maxRequests: 5,
   windowMs: 1000,
@@ -17,7 +16,6 @@ const rateLimiter = new RateLimiter({
 function isRetryableError(error: Error): boolean {
   const message = error.message.toLowerCase();
 
-  // Retry on temporary errors
   if (
     message.includes('429') || // Too Many Requests
     message.includes('503') || // Service Unavailable
@@ -29,17 +27,14 @@ function isRetryableError(error: Error): boolean {
     return true;
   }
 
-  // Don't retry on permanent errors
   if (
     message.includes('404') || // Not Found
     message.includes('403') || // Forbidden
     message.includes('401')
   ) {
-    // Unauthorized
     return false;
   }
 
-  // Default to retry for other errors
   return true;
 }
 

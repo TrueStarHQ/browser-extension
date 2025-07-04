@@ -28,7 +28,6 @@ export class PreferencesManager {
           return;
         }
 
-        // Update preferences with stored values or keep defaults
         for (const key of keys) {
           if (result[key] !== undefined) {
             this.preferences[key] = result[key];
@@ -70,7 +69,6 @@ export class PreferencesManager {
           `Failed to save preference ${String(key)}:`,
           chrome.runtime.lastError
         );
-        // Revert the in-memory change since storage failed
         this.preferences[key] = oldValue;
       }
     });

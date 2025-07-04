@@ -39,7 +39,6 @@ export class ReviewCache {
       return null;
     }
 
-    // Check if entry has expired
     if (Date.now() - entry.timestamp > this.ttlMs) {
       this.cache.delete(productId);
       return null;
@@ -55,7 +54,6 @@ export class ReviewCache {
       return false;
     }
 
-    // Check expiration
     if (Date.now() - entry.timestamp > this.ttlMs) {
       this.cache.delete(productId);
       return false;
@@ -77,7 +75,6 @@ export class ReviewCache {
     let oldestTimestamp: number | null = null;
     let newestTimestamp: number | null = null;
 
-    // Clean up expired entries first
     const now = Date.now();
     for (const [productId, entry] of this.cache.entries()) {
       if (now - entry.timestamp > this.ttlMs) {
@@ -85,7 +82,6 @@ export class ReviewCache {
       }
     }
 
-    // Calculate stats from remaining entries
     for (const entry of this.cache.values()) {
       totalReviews += entry.reviews.length;
 

@@ -10,12 +10,10 @@ export function selectPagesToFetch(totalPages: number): number[] {
 
   const pages: number[] = [];
 
-  // Add first 5 pages (most recent reviews)
   for (let i = 1; i <= RECENT_PAGES; i++) {
     pages.push(i);
   }
 
-  // Add last 3 pages (oldest reviews)
   for (let i = totalPages - OLDEST_PAGES + 1; i <= totalPages; i++) {
     pages.push(i);
   }
@@ -26,7 +24,6 @@ export function selectPagesToFetch(totalPages: number): number[] {
     const middleEnd = totalPages - OLDEST_PAGES;
     const middleRange = middleEnd - middleStart;
 
-    // Sample evenly from the middle
     for (let i = 0; i < MIDDLE_SAMPLES; i++) {
       const offset = Math.floor((middleRange / (MIDDLE_SAMPLES + 1)) * (i + 1));
       const pageNum = middleStart + offset;
@@ -34,6 +31,5 @@ export function selectPagesToFetch(totalPages: number): number[] {
     }
   }
 
-  // Sort pages in ascending order
   return pages.sort((a, b) => a - b);
 }
