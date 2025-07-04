@@ -16,14 +16,12 @@ class TrueStarApi {
 
   async analyzeReviews(reviews: AmazonReview[]): Promise<ReviewChecker> {
     try {
-      // Log payload size for monitoring
       const payload = JSON.stringify({ reviews });
       const payloadSizeKB = payload.length / 1024;
       log.info(
         `Sending ${reviews.length} reviews to API (${payloadSizeKB.toFixed(1)} KB)`
       );
 
-      // Warn if payload is getting large
       if (payloadSizeKB > this.MAX_PAYLOAD_SIZE_KB) {
         log.warn(
           `Payload size (${payloadSizeKB.toFixed(1)} KB) exceeds recommended limit of ${this.MAX_PAYLOAD_SIZE_KB} KB`
@@ -49,7 +47,6 @@ class TrueStarApi {
     } catch (error) {
       log.error('Backend API error:', error);
 
-      // Return fallback result
       return {
         isFake: false,
         confidence: 0,
