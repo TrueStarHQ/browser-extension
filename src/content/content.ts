@@ -13,7 +13,6 @@ import { truestarApi } from '../services/truestar-api';
 import { log } from '../utils/logger';
 import { mountComponent } from '../utils/mount-component';
 
-// Validation function for API response
 function isValidAnalysisResult(obj: unknown): obj is ReviewChecker {
   if (!obj || typeof obj !== 'object') return false;
 
@@ -65,7 +64,7 @@ class AmazonProductPageChecker {
     const productId = this.extractProductId();
     if (!productId) {
       log.error('Could not extract product ID');
-      return this.extractReviews(); // Fallback to single page
+      return this.extractReviews();
     }
 
     try {
@@ -88,9 +87,8 @@ class AmazonProductPageChecker {
         `Will fetch ${pagesToFetch.length} pages: ${pagesToFetch.join(', ')}`
       );
 
-      // Generate URLs for pages to fetch (excluding page 1 if we already have it)
       const urls = pagesToFetch
-        .filter((pageNum) => pageNum !== 1) // Skip page 1 as we already have it
+        .filter((pageNum) => pageNum !== 1)
         .map((pageNum) => generateReviewPageUrl(productId, pageNum));
 
       const fetchedPages = await fetchMultiplePages(urls);
@@ -206,7 +204,6 @@ class AmazonProductPageChecker {
   }
 }
 
-// Export for testing
 export class AmazonMultiPageExtractor {
   extractProductId(): string | null {
     const match = window.location.pathname.match(/\/dp\/([A-Z0-9]+)/);

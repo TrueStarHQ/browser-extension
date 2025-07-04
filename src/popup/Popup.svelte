@@ -8,7 +8,6 @@
 
   $effect(() => {
     (async () => {
-      // Wait for preferences to load from storage
       await preferencesManager.waitForLoad();
       errorReportingEnabled = preferencesManager.isErrorLoggingEnabled();
       loading = false;

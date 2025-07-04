@@ -6,12 +6,9 @@
 import type { Component } from 'svelte';
 import { mount, unmount } from 'svelte';
 
-// Import the compiled CSS as a string at build time
-// postcss-import will process @import statements
 import styles from '../assets/app.css?inline';
 import { log } from './logger';
 
-// Singleton CSSStyleSheet instance shared across all Shadow DOM instances
 let sharedStyleSheet: CSSStyleSheet | null = null;
 
 /**
@@ -51,7 +48,6 @@ export function mountComponent<T extends Record<string, unknown>>(
     mountTarget = shadowContainer;
 
     try {
-      // Check if browser supports Constructable Stylesheets on ShadowRoot
       if (
         typeof CSSStyleSheet !== 'undefined' &&
         'adoptedStyleSheets' in shadow

@@ -3,9 +3,8 @@ import { log } from './logger';
 export class PreferencesManager {
   private loadPromise: Promise<void>;
 
-  // Single source of truth for preferences and their defaults
   private preferences = {
-    errorLoggingEnabled: false, // Default to disabled for privacy
+    errorLoggingEnabled: false,
   };
 
   constructor() {

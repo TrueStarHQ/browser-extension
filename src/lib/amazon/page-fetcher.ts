@@ -4,15 +4,14 @@ export interface PageResult {
   error?: Error;
 }
 
-// Determine if an error is retryable
 function isRetryableError(error: Error): boolean {
   const message = error.message.toLowerCase();
 
   if (
-    message.includes('429') || // Too Many Requests
-    message.includes('503') || // Service Unavailable
-    message.includes('502') || // Bad Gateway
-    message.includes('504') || // Gateway Timeout
+    message.includes('429') ||
+    message.includes('503') ||
+    message.includes('502') ||
+    message.includes('504') ||
     message.includes('network') ||
     message.includes('timeout')
   ) {
@@ -20,8 +19,8 @@ function isRetryableError(error: Error): boolean {
   }
 
   if (
-    message.includes('404') || // Not Found
-    message.includes('403') || // Forbidden
+    message.includes('404') ||
+    message.includes('403') ||
     message.includes('401')
   ) {
     return false;
@@ -48,17 +47,14 @@ export async function fetchReviewPage(url: string): Promise<string> {
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
-      // Don't retry if it's not a retryable error
       if (!isRetryableError(lastError)) {
         throw lastError;
       }
 
-      // Don't retry on last attempt
       if (attempt === maxRetries) {
         throw lastError;
       }
 
-      // Simple backoff: wait longer each time (1s, 2s, 3s)
       const delay = (attempt + 1) * 1000;
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
@@ -86,7 +82,6 @@ export async function fetchMultiplePages(
       });
     }
 
-    // Add delay between requests to be polite to Amazon (except after last request)
     if (i < urls.length - 1) {
       await new Promise((resolve) => setTimeout(resolve, 200));
     }
