@@ -15,6 +15,7 @@
       "$lib": ["./src"],
       "$lib/*": ["./src/*"]
     },
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
