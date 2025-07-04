@@ -1152,6 +1152,7 @@ __metadata:
     "@tailwindcss/postcss": "npm:^4.1.11"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/svelte": "npm:^5.2.8"
+    "@truestarhq/shared-types": "npm:^0.0.1"
     "@tsconfig/svelte": "npm:^5.0.4"
     "@types/chrome": "npm:^0.0.326"
     "@types/node": "npm:^24.0.4"
@@ -1185,6 +1186,15 @@ __metadata:
     vitest: "npm:^3.2.4"
   languageName: unknown
   linkType: soft
+
+"@truestarhq/shared-types@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "@truestarhq/shared-types@npm:0.0.1"
+  dependencies:
+    zod: "npm:^3.23.8"
+  checksum: 10c0/0be5ed36ef49355a66cf81f6da24e105b5b9ac35bf82874e5215a487c7664ae2ce19fbae2d236b3477d79a56101335ee5797c9190aba3c59bef08c8a2749e9a7
+  languageName: node
+  linkType: hard
 
 "@tsconfig/svelte@npm:^5.0.4":
   version: 5.0.4
@@ -5239,5 +5249,12 @@ __metadata:
   version: 1.1.2
   resolution: "zimmerframe@npm:1.1.2"
   checksum: 10c0/8f693609c31cbb4449db223acd61661bc93b73e615f9db6fb8c86d4ceea84ca54cbbeebcf53cf74c22a1f923b92abd18e97988a5e175c76b6ab17238e5593a9d
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.23.8":
+  version: 3.25.72
+  resolution: "zod@npm:3.25.72"
+  checksum: 10c0/10a15e6ae66318966523a856fef75b0ad2ebf9b8edb9ce80ad64ec5cb849df5ecd549450bd6392abe5084d63a3aa30390edecb15c3cb7c61c022c113174f9f31
   languageName: node
   linkType: hard

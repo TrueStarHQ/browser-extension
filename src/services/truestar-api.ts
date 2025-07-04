@@ -1,28 +1,9 @@
+import {
+  type AmazonReview,
+  type ReviewChecker,
+} from '@truestarhq/shared-types';
+
 import { log } from '../utils/logger';
-
-// TODO: Use shared types with backend, generated from OpenAPI spec
-interface ReviewData {
-  id: string;
-  rating: number;
-  text: string;
-  author: string;
-  verified: boolean;
-  date?: string;
-  helpfulVotes?: number;
-  totalVotes?: number;
-  productVariation?: string;
-  isVineReview?: boolean;
-  badges?: string[];
-}
-
-// TODO: Use shared types with backend, generated from OpenAPI spec
-interface AnalysisResult {
-  isFake: boolean;
-  confidence: number;
-  reasons: string[];
-  flags: string[];
-  summary: string;
-}
 
 class TrueStarApi {
   private baseUrl: string;
@@ -33,7 +14,7 @@ class TrueStarApi {
       import.meta.env.VITE_BACKEND_API_URL || 'https://api.truestar.pro';
   }
 
-  async analyzeReviews(reviews: ReviewData[]): Promise<AnalysisResult> {
+  async analyzeReviews(reviews: AmazonReview[]): Promise<ReviewChecker> {
     try {
       // Log payload size for monitoring
       const payload = JSON.stringify({ reviews });
@@ -81,4 +62,3 @@ class TrueStarApi {
 }
 
 export const truestarApi = new TrueStarApi();
-export type { AnalysisResult,ReviewData };
