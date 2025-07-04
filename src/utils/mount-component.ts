@@ -30,7 +30,7 @@ function getSharedStyleSheet(): CSSStyleSheet {
  * Mounts a Svelte component with Shadow DOM isolation.
  * @returns Object with destroy method for cleanup
  */
-export function mountComponent<T extends Record<string, any>>(
+export function mountComponent<T extends Record<string, unknown>>(
   ComponentClass: Component<T>,
   props: T,
   target?: HTMLElement
@@ -46,12 +46,10 @@ export function mountComponent<T extends Record<string, any>>(
   if (typeof container.attachShadow === 'function') {
     const shadow = container.attachShadow({ mode: 'open' });
 
-    // Svelte needs a regular element, not the shadow root itself
     const shadowContainer = document.createElement('div');
     shadow.appendChild(shadowContainer);
     mountTarget = shadowContainer;
 
-    // Apply styles - try Constructable Stylesheets first, with a fallback to style element
     try {
       // Check if browser supports Constructable Stylesheets on ShadowRoot
       if (
@@ -63,7 +61,6 @@ export function mountComponent<T extends Record<string, any>>(
         throw new Error('Constructable Stylesheets not supported');
       }
     } catch {
-      // Fallback to style element for any errors or unsupported browsers
       styleElement = document.createElement('style');
       styleElement.textContent = styles;
       shadow.insertBefore(styleElement, shadowContainer);
@@ -72,13 +69,11 @@ export function mountComponent<T extends Record<string, any>>(
     log.warn('Shadow DOM not supported - styles may conflict with host page');
   }
 
-  // Mount the Svelte component
   const componentInstance = mount(ComponentClass, {
     target: mountTarget,
     props,
   });
 
-  // Return an object with a cleanup function
   return {
     destroy: () => {
       unmount(componentInstance);
@@ -88,7 +83,6 @@ export function mountComponent<T extends Record<string, any>>(
       }
 
       if (!target && container.parentNode) {
-        // We created the container, so we need to remove it
         container.remove();
       }
     },
