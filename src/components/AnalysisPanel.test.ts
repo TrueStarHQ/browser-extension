@@ -36,7 +36,7 @@ describe('AnalysisPanel', () => {
     expect(getByText('85%')).toBeTruthy();
   });
 
-  it('display confidence level', () => {
+  it('displays confidence level', () => {
     const { getByText } = render(AnalysisPanel, {
       props: {
         analysis: {
@@ -52,7 +52,7 @@ describe('AnalysisPanel', () => {
     expect(getByText(/Confidence: 85%/)).toBeTruthy();
   });
 
-  it('display summary', () => {
+  it('displays summary', () => {
     const { getByText } = render(AnalysisPanel, {
       props: {
         analysis: {
@@ -70,7 +70,7 @@ describe('AnalysisPanel', () => {
     ).toBeTruthy();
   });
 
-  it('call onClose when close button is clicked', () => {
+  it('calls onClose when close button is clicked', () => {
     const onClose = vi.fn();
     const { getByRole } = render(AnalysisPanel, {
       props: {
@@ -92,7 +92,7 @@ describe('AnalysisPanel', () => {
   });
 
   describe('Edge Cases', () => {
-    it('handle null summary gracefully', () => {
+    it('displays fallback text for null summary', () => {
       const { getByText } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -108,7 +108,7 @@ describe('AnalysisPanel', () => {
       expect(getByText('No analysis available')).toBeTruthy();
     });
 
-    it('handle undefined summary gracefully', () => {
+    it('displays fallback text for undefined summary', () => {
       const { getByText } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -124,7 +124,7 @@ describe('AnalysisPanel', () => {
       expect(getByText('No analysis available')).toBeTruthy();
     });
 
-    it('handle empty string summary', () => {
+    it('displays fallback text for empty summary', () => {
       const { getByText } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -140,7 +140,7 @@ describe('AnalysisPanel', () => {
       expect(getByText('No analysis available')).toBeTruthy();
     });
 
-    it('handle missing reasons array', () => {
+    it('hides red flags section when reasons is null', () => {
       const { container } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -157,7 +157,7 @@ describe('AnalysisPanel', () => {
       expect(container.querySelector('details')).toBeFalsy();
     });
 
-    it('handle missing flags array', () => {
+    it('hides red flags section when flags is null', () => {
       const { container } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -174,7 +174,7 @@ describe('AnalysisPanel', () => {
       expect(container.querySelector('details')).toBeFalsy();
     });
 
-    it('display red flags when both arrays have items', () => {
+    it('displays red flags when both arrays have items', () => {
       const { getByText, getAllByRole } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -192,7 +192,7 @@ describe('AnalysisPanel', () => {
       expect(listItems.length).toBe(4);
     });
 
-    it('handle confidence value of 0', () => {
+    it('displays 100% real score for 0 confidence fake', () => {
       const { getByText } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -209,7 +209,7 @@ describe('AnalysisPanel', () => {
       expect(getByText('Confidence: 0%')).toBeTruthy();
     });
 
-    it('handle confidence value of 1', () => {
+    it('displays 100% fake score for confidence of 1', () => {
       const { getByText } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -226,7 +226,7 @@ describe('AnalysisPanel', () => {
       expect(getByText('Confidence: 100%')).toBeTruthy();
     });
 
-    it('not render close button when onClose is not provided', () => {
+    it('hides close button when onClose is not provided', () => {
       const { queryByRole } = render(AnalysisPanel, {
         props: {
           analysis: {
@@ -243,7 +243,7 @@ describe('AnalysisPanel', () => {
       expect(closeButton).toBeFalsy();
     });
 
-    it('handle arrays with empty strings', () => {
+    it('renders all items including empty strings', () => {
       const { getAllByRole } = render(AnalysisPanel, {
         props: {
           analysis: {
