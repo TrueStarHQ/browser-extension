@@ -35,7 +35,7 @@ describe('Page Fetcher', () => {
   });
 
   describe('fetchMultiplePages', () => {
-    it('fetch multiple pages in parallel', async () => {
+    it('fetches multiple pages sequentially with delays', async () => {
       const mockResponses: Record<string, string> = {
         'https://www.amazon.com/product-reviews/B08N5WRWNW?pageNumber=1':
           '<html>Page 1</html>',

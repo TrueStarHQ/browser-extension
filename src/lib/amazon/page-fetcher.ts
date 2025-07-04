@@ -1,15 +1,8 @@
-import { RateLimiter } from '../../utils/rate-limiter';
-
 export interface PageResult {
   url: string;
   html: string;
   error?: Error;
 }
-
-const rateLimiter = new RateLimiter({
-  maxRequests: 5,
-  windowMs: 1000,
-});
 
 // Determine if an error is retryable
 function isRetryableError(error: Error): boolean {
@@ -38,59 +31,66 @@ function isRetryableError(error: Error): boolean {
 }
 
 export async function fetchReviewPage(url: string): Promise<string> {
-  return rateLimiter.executeWithLimit(async () => {
-    let lastError: Error;
-    const maxRetries = 3;
+  let lastError: Error;
+  const maxRetries = 3;
 
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        const response = await fetch(url);
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url);
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch page: ${response.status} ${response.statusText}`
-          );
-        }
-
-        return response.text();
-      } catch (error) {
-        lastError = error instanceof Error ? error : new Error(String(error));
-
-        // Don't retry if it's not a retryable error
-        if (!isRetryableError(lastError)) {
-          throw lastError;
-        }
-
-        // Don't retry on last attempt
-        if (attempt === maxRetries) {
-          throw lastError;
-        }
-
-        // Simple backoff: wait longer each time (1s, 2s, 3s)
-        const delay = (attempt + 1) * 1000;
-        await new Promise((resolve) => setTimeout(resolve, delay));
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch page: ${response.status} ${response.statusText}`
+        );
       }
-    }
 
-    throw lastError!;
-  });
+      return response.text();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      // Don't retry if it's not a retryable error
+      if (!isRetryableError(lastError)) {
+        throw lastError;
+      }
+
+      // Don't retry on last attempt
+      if (attempt === maxRetries) {
+        throw lastError;
+      }
+
+      // Simple backoff: wait longer each time (1s, 2s, 3s)
+      const delay = (attempt + 1) * 1000;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError!;
 }
 
 export async function fetchMultiplePages(
   urls: string[]
 ): Promise<PageResult[]> {
-  const promises = urls.map(async (url) => {
+  const results: PageResult[] = [];
+
+  for (let i = 0; i < urls.length; i++) {
+    const url = urls[i]!;
+
     try {
       const html = await fetchReviewPage(url);
-      return { url, html };
+      results.push({ url, html });
     } catch (error) {
-      return {
+      results.push({
         url,
         html: '',
         error: error instanceof Error ? error : new Error(String(error)),
-      };
+      });
     }
-  });
 
-  return Promise.all(promises);
+    // Add delay between requests to be polite to Amazon (except after last request)
+    if (i < urls.length - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+  }
+
+  return results;
 }
