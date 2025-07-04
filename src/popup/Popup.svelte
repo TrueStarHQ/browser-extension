@@ -1,18 +1,18 @@
 <script lang="ts">
   import '../assets/app.css';
 
-  import { onMount } from 'svelte';
-
   import { preferencesManager } from '../utils/user-preferences';
 
-  let errorReportingEnabled = false;
-  let loading = true;
+  let errorReportingEnabled = $state(false);
+  let loading = $state(true);
 
-  onMount(async () => {
-    // Wait for preferences to load from storage
-    await preferencesManager.waitForLoad();
-    errorReportingEnabled = preferencesManager.isErrorLoggingEnabled();
-    loading = false;
+  $effect(() => {
+    (async () => {
+      // Wait for preferences to load from storage
+      await preferencesManager.waitForLoad();
+      errorReportingEnabled = preferencesManager.isErrorLoggingEnabled();
+      loading = false;
+    })();
   });
 
   function handleToggle() {
@@ -30,11 +30,13 @@
     {#if loading}
       <div class="text-center text-gray-600 py-5">Loading...</div>
     {:else}
-      <label class="flex items-center cursor-pointer text-sm font-medium text-gray-900">
+      <label
+        class="flex items-center cursor-pointer text-sm font-medium text-gray-900"
+      >
         <input
           type="checkbox"
           bind:checked={errorReportingEnabled}
-          on:change={handleToggle}
+          onchange={handleToggle}
           class="mr-2 w-4 h-4 cursor-pointer text-primary border-gray-300 rounded focus:ring-primary"
         />
         Enable error reporting
