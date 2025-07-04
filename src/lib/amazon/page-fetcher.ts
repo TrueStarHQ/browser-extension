@@ -1,5 +1,4 @@
 import { RateLimiter } from '../../utils/rate-limiter';
-import { retryWithBackoff } from '../../utils/retry-helper';
 
 export interface PageResult {
   url: string;
@@ -40,8 +39,11 @@ function isRetryableError(error: Error): boolean {
 
 export async function fetchReviewPage(url: string): Promise<string> {
   return rateLimiter.executeWithLimit(async () => {
-    return retryWithBackoff(
-      async () => {
+    let lastError: Error;
+    const maxRetries = 3;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -51,14 +53,26 @@ export async function fetchReviewPage(url: string): Promise<string> {
         }
 
         return response.text();
-      },
-      {
-        maxRetries: 3,
-        initialDelay: 500,
-        maxDelay: 5000,
-        shouldRetry: isRetryableError,
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+
+        // Don't retry if it's not a retryable error
+        if (!isRetryableError(lastError)) {
+          throw lastError;
+        }
+
+        // Don't retry on last attempt
+        if (attempt === maxRetries) {
+          throw lastError;
+        }
+
+        // Simple backoff: wait longer each time (1s, 2s, 3s)
+        const delay = (attempt + 1) * 1000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
-    );
+    }
+
+    throw lastError!;
   });
 }
 
