@@ -1,7 +1,7 @@
 import { SentryReporter } from './sentry-reporter';
 
 class Logger {
-  private readonly prefix = 'TrueStar:';
+  private readonly prefix = '[TrueStar]';
   private errorReporter: SentryReporter | null = null;
 
   constructor() {

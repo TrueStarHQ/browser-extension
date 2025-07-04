@@ -36,7 +36,7 @@ describe('Logger', () => {
     it('log info messages with TrueStar prefix', () => {
       log.info('Test message');
 
-      expect(consoleSpy.info).toHaveBeenCalledWith('TrueStar: Test message');
+      expect(consoleSpy.info).toHaveBeenCalledWith('[TrueStar] Test message');
     });
 
     it('pass additional arguments to console.info', () => {
@@ -44,7 +44,7 @@ describe('Logger', () => {
       log.info('Test message', obj, 'extra');
 
       expect(consoleSpy.info).toHaveBeenCalledWith(
-        'TrueStar: Test message',
+        '[TrueStar] Test message',
         obj,
         'extra'
       );
@@ -55,7 +55,9 @@ describe('Logger', () => {
     it('log warning messages with TrueStar prefix', () => {
       log.warn('Warning message');
 
-      expect(consoleSpy.warn).toHaveBeenCalledWith('TrueStar: Warning message');
+      expect(consoleSpy.warn).toHaveBeenCalledWith(
+        '[TrueStar] Warning message'
+      );
     });
 
     it('pass additional arguments to console.warn', () => {
@@ -63,7 +65,7 @@ describe('Logger', () => {
       log.warn('Warning message', obj);
 
       expect(consoleSpy.warn).toHaveBeenCalledWith(
-        'TrueStar: Warning message',
+        '[TrueStar] Warning message',
         obj
       );
     });
@@ -73,7 +75,7 @@ describe('Logger', () => {
     it('log error messages with TrueStar prefix', () => {
       log.error('Error message');
 
-      expect(consoleSpy.error).toHaveBeenCalledWith('TrueStar: Error message');
+      expect(consoleSpy.error).toHaveBeenCalledWith('[TrueStar] Error message');
     });
 
     it('pass additional arguments to console.error', () => {
@@ -81,7 +83,7 @@ describe('Logger', () => {
       log.error('Error message', error, 'context');
 
       expect(consoleSpy.error).toHaveBeenCalledWith(
-        'TrueStar: Error message',
+        '[TrueStar] Error message',
         error,
         'context'
       );
@@ -94,7 +96,7 @@ describe('Logger', () => {
       log.error('Error occurred', error, 'context');
 
       expect(consoleSpy.error).toHaveBeenCalledWith(
-        'TrueStar: Error occurred',
+        '[TrueStar] Error occurred',
         error,
         'context'
       );
@@ -104,7 +106,7 @@ describe('Logger', () => {
       log.error('Simple error message', 'string data', { context: 'object' });
 
       expect(consoleSpy.error).toHaveBeenCalledWith(
-        'TrueStar: Simple error message',
+        '[TrueStar] Simple error message',
         'string data',
         { context: 'object' }
       );
@@ -117,9 +119,9 @@ describe('Logger', () => {
       log.warn('Second message');
       log.error('Third message');
 
-      expect(consoleSpy.info).toHaveBeenCalledWith('TrueStar: First message');
-      expect(consoleSpy.warn).toHaveBeenCalledWith('TrueStar: Second message');
-      expect(consoleSpy.error).toHaveBeenCalledWith('TrueStar: Third message');
+      expect(consoleSpy.info).toHaveBeenCalledWith('[TrueStar] First message');
+      expect(consoleSpy.warn).toHaveBeenCalledWith('[TrueStar] Second message');
+      expect(consoleSpy.error).toHaveBeenCalledWith('[TrueStar] Third message');
     });
   });
 });
