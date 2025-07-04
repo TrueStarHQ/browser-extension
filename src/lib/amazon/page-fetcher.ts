@@ -70,7 +70,11 @@ export async function fetchMultiplePages(
       const html = await fetchReviewPage(url);
       return { url, html };
     } catch (error) {
-      return { url, html: '', error: error as Error };
+      return {
+        url,
+        html: '',
+        error: error instanceof Error ? error : new Error(String(error)),
+      };
     }
   });
 
