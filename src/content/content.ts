@@ -1,3 +1,5 @@
+import type { AmazonReview, ReviewChecker } from '@truestarhq/shared-types';
+
 import AnalysisPanel from '../components/AnalysisPanel.svelte';
 import LoadingIndicator from '../components/LoadingIndicator.svelte';
 import {
@@ -8,13 +10,12 @@ import { fetchMultiplePages } from '../lib/amazon/page-fetcher';
 import { ReviewCache } from '../lib/amazon/review-cache';
 import { parseReviewsFromHtml } from '../lib/amazon/review-parser';
 import { selectPagesToFetch } from '../lib/amazon/review-sampling';
-import type { AnalysisResult, ReviewData } from '../services/truestar-api';
 import { truestarApi } from '../services/truestar-api';
 import { log } from '../utils/logger';
 import { mountComponent } from '../utils/mount-component';
 
 // Validation function for API response
-function isValidAnalysisResult(obj: unknown): obj is AnalysisResult {
+function isValidAnalysisResult(obj: unknown): obj is ReviewChecker {
   if (!obj || typeof obj !== 'object') return false;
 
   const analysis = obj as Record<string, unknown>;
@@ -40,7 +41,7 @@ class AmazonProductPageChecker {
     this.init();
   }
 
-  private init() {
+  private init(): void {
     if (this.isAmazonProductPage()) {
       log.info('Amazon product page detected');
       this.analyzeReviews();
@@ -59,11 +60,11 @@ class AmazonProductPageChecker {
     return match?.[1] ?? null;
   }
 
-  private extractReviews(): ReviewData[] {
+  private extractReviews(): AmazonReview[] {
     return parseReviewsFromHtml(document.documentElement.innerHTML);
   }
 
-  private async extractMultiPageReviews(): Promise<ReviewData[]> {
+  private async extractMultiPageReviews(): Promise<AmazonReview[]> {
     const productId = this.extractProductId();
     if (!productId) {
       log.error('Could not extract product ID');
@@ -131,7 +132,7 @@ class AmazonProductPageChecker {
     }
   }
 
-  private async analyzeReviews() {
+  private async analyzeReviews(): Promise<void> {
     try {
       this.showLoadingIndicator();
 
@@ -153,23 +154,23 @@ class AmazonProductPageChecker {
     }
   }
 
-  private showLoadingIndicator() {
+  private showLoadingIndicator(): void {
     this.hideLoadingIndicator(); // Remove any existing loader
     this.loadingComponent = mountComponent(LoadingIndicator, {});
   }
 
-  private hideLoadingIndicator() {
+  private hideLoadingIndicator(): void {
     if (this.loadingComponent) {
       this.loadingComponent.destroy();
       this.loadingComponent = null;
     }
   }
 
-  private async checkReviews(reviews: ReviewData[]): Promise<AnalysisResult> {
+  private async checkReviews(reviews: AmazonReview[]): Promise<ReviewChecker> {
     return await truestarApi.analyzeReviews(reviews);
   }
 
-  private displayResults(analysis: unknown) {
+  private displayResults(analysis: unknown): void {
     if (!isValidAnalysisResult(analysis)) {
       log.error('Invalid analysis result received:', analysis);
       this.displayError('Invalid analysis response received');
@@ -197,7 +198,7 @@ class AmazonProductPageChecker {
     });
   }
 
-  private displayError(message: string) {
+  private displayError(message: string): void {
     if (this.analysisComponent) {
       this.analysisComponent.destroy();
     }

@@ -1,6 +1,6 @@
+import type { AmazonReview } from '@truestarhq/shared-types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ReviewData } from '../../services/truestar-api';
 import { ReviewCache } from './review-cache';
 
 describe('ReviewCache', () => {
@@ -19,7 +19,7 @@ describe('ReviewCache', () => {
   describe('set and get', () => {
     it('store and retrieve reviews by product ID', () => {
       const productId = 'B08N5WRWNW';
-      const reviews: ReviewData[] = [
+      const reviews: AmazonReview[] = [
         {
           id: 'R1TEST',
           rating: 5,
@@ -42,7 +42,7 @@ describe('ReviewCache', () => {
 
     it('overwrite existing cache entry', () => {
       const productId = 'B08N5WRWNW';
-      const reviews1: ReviewData[] = [
+      const reviews1: AmazonReview[] = [
         {
           id: 'R1',
           rating: 5,
@@ -51,7 +51,7 @@ describe('ReviewCache', () => {
           verified: true,
         },
       ];
-      const reviews2: ReviewData[] = [
+      const reviews2: AmazonReview[] = [
         {
           id: 'R2',
           rating: 4,
@@ -71,7 +71,7 @@ describe('ReviewCache', () => {
   describe('expiration', () => {
     it('return null for expired entries', () => {
       const productId = 'B08N5WRWNW';
-      const reviews: ReviewData[] = [
+      const reviews: AmazonReview[] = [
         {
           id: 'R1',
           rating: 5,
@@ -92,7 +92,7 @@ describe('ReviewCache', () => {
     it('respect custom TTL', () => {
       const customCache = new ReviewCache({ ttlMinutes: 30 });
       const productId = 'B08N5WRWNW';
-      const reviews: ReviewData[] = [
+      const reviews: AmazonReview[] = [
         {
           id: 'R1',
           rating: 5,
@@ -168,7 +168,7 @@ describe('ReviewCache', () => {
 
   describe('getStats method', () => {
     it('return cache statistics', () => {
-      const reviews1: ReviewData[] = [
+      const reviews1: AmazonReview[] = [
         {
           id: 'R1',
           rating: 5,
@@ -177,7 +177,7 @@ describe('ReviewCache', () => {
           verified: true,
         },
       ];
-      const reviews2: ReviewData[] = [
+      const reviews2: AmazonReview[] = [
         {
           id: 'R2',
           rating: 4,

@@ -1,6 +1,6 @@
+import type { AmazonReview, ReviewChecker } from '@truestarhq/shared-types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { AnalysisResult, ReviewData } from './truestar-api';
 import { truestarApi } from './truestar-api';
 
 // Mock the logger
@@ -17,7 +17,7 @@ import { log } from '../utils/logger';
 describe('TrueStarApi', () => {
   let fetchMock: ReturnType<typeof vi.fn>;
 
-  const mockSuccessResponse: AnalysisResult = {
+  const mockSuccessResponse: ReviewChecker = {
     isFake: false,
     confidence: 0.85,
     reasons: ['Varied writing styles', 'Mix of positive and negative'],
@@ -50,7 +50,7 @@ describe('TrueStarApi', () => {
   });
 
   describe('analyzeReviews', () => {
-    const mockReviews: ReviewData[] = [
+    const mockReviews: AmazonReview[] = [
       {
         id: 'R1TEST123456789',
         rating: 5,
@@ -226,7 +226,7 @@ describe('TrueStarApi', () => {
     });
 
     it('handle large review datasets', async () => {
-      const largeReviewSet: ReviewData[] = Array.from(
+      const largeReviewSet: AmazonReview[] = Array.from(
         { length: 100 },
         (_, i) => ({
           id: `R${i}LARGE`,
@@ -292,7 +292,7 @@ describe('TrueStarApi', () => {
 
     it('warn when payload exceeds size limit', async () => {
       // Create a very large review set that exceeds 1MB
-      const veryLargeReviewSet: ReviewData[] = Array.from(
+      const veryLargeReviewSet: AmazonReview[] = Array.from(
         { length: 5000 },
         (_, i) => ({
           id: `R${i}VERYLONGID`,
@@ -330,8 +330,8 @@ describe('TrueStarApi', () => {
   });
 
   describe('type safety', () => {
-    it('accept properly typed ReviewData', async () => {
-      const validReview: ReviewData = {
+    it('accept properly typed AmazonReview', async () => {
+      const validReview: AmazonReview = {
         id: 'RVALIDTEST123',
         rating: 4.5,
         text: 'Good product',
@@ -346,7 +346,7 @@ describe('TrueStarApi', () => {
       });
 
       // Should compile and run without type errors
-      const result: AnalysisResult = await truestarApi.analyzeReviews([
+      const result: ReviewChecker = await truestarApi.analyzeReviews([
         validReview,
       ]);
 

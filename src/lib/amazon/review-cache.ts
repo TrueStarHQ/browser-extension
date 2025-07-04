@@ -1,20 +1,4 @@
-import type { ReviewData } from '../../services/truestar-api';
-
-interface CacheEntry {
-  reviews: ReviewData[];
-  timestamp: number;
-}
-
-interface CacheOptions {
-  ttlMinutes?: number;
-}
-
-interface CacheStats {
-  entries: number;
-  totalReviews: number;
-  oldestEntry: Date | null;
-  newestEntry: Date | null;
-}
+import type { AmazonReview } from '@truestarhq/shared-types';
 
 export class ReviewCache {
   private cache: Map<string, CacheEntry> = new Map();
@@ -25,14 +9,14 @@ export class ReviewCache {
     this.ttlMs = ttlMinutes * 60 * 1000;
   }
 
-  set(productId: string, reviews: ReviewData[]): void {
+  set(productId: string, reviews: AmazonReview[]): void {
     this.cache.set(productId, {
       reviews,
       timestamp: Date.now(),
     });
   }
 
-  get(productId: string): ReviewData[] | null {
+  get(productId: string): AmazonReview[] | null {
     const entry = this.cache.get(productId);
 
     if (!entry) {
@@ -101,4 +85,20 @@ export class ReviewCache {
       newestEntry: newestTimestamp ? new Date(newestTimestamp) : null,
     };
   }
+}
+
+interface CacheEntry {
+  reviews: AmazonReview[];
+  timestamp: number;
+}
+
+interface CacheOptions {
+  ttlMinutes?: number;
+}
+
+interface CacheStats {
+  entries: number;
+  totalReviews: number;
+  oldestEntry: Date | null;
+  newestEntry: Date | null;
 }

@@ -1,13 +1,14 @@
+import type { AmazonReview } from '@truestarhq/shared-types';
+
 import { log } from '$lib/utils/logger';
 
-import type { ReviewData } from '../../services/truestar-api';
 import { generateFallbackId } from './review-id-generator';
 
-export function parseReviewsFromHtml(html: string): ReviewData[] {
+export function parseReviewsFromHtml(html: string): AmazonReview[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
 
-  const reviews: ReviewData[] = [];
+  const reviews: AmazonReview[] = [];
   const reviewElements = doc.querySelectorAll('[data-hook="review"]');
 
   reviewElements.forEach((reviewEl, index) => {
