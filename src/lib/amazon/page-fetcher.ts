@@ -8,10 +8,10 @@ function isRetryableError(error: Error): boolean {
   const message = error.message.toLowerCase();
 
   if (
-    message.includes('429') ||
-    message.includes('503') ||
-    message.includes('502') ||
-    message.includes('504') ||
+    message.includes('429') || // Too Many Requests
+    message.includes('503') || // Service Unavailable
+    message.includes('502') || // Bad Gateway
+    message.includes('504') || // Gateway Timeout
     message.includes('network') ||
     message.includes('timeout')
   ) {
@@ -19,9 +19,10 @@ function isRetryableError(error: Error): boolean {
   }
 
   if (
-    message.includes('404') ||
-    message.includes('403') ||
-    message.includes('401')
+    message.includes('404') || // Not Found
+    message.includes('403') || // Forbidden
+    message.includes('401') || // Unauthorized
+    message.includes('400') // Bad Request
   ) {
     return false;
   }
