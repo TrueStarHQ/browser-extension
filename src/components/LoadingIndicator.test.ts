@@ -4,13 +4,13 @@ import { describe, expect, it } from 'vitest';
 import LoadingIndicator from './LoadingIndicator.svelte';
 
 describe('LoadingIndicator', () => {
-  it('render loading indicator', () => {
+  it('renders loading indicator', () => {
     const { container } = render(LoadingIndicator);
 
     expect(container.querySelector('#truestar-loader')).toBeTruthy();
   });
 
-  it('display loading text', () => {
+  it('displays loading text', () => {
     const { getByText } = render(LoadingIndicator);
 
     expect(getByText('TrueStar Analysis')).toBeTruthy();

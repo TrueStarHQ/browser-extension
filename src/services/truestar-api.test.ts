@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { truestarApi } from './truestar-api';
 
-// Mock the logger
 vi.mock('../utils/logger', () => ({
   log: {
     error: vi.fn(),
@@ -16,7 +15,6 @@ import { log } from '../utils/logger';
 
 describe('TrueStarApi', () => {
   let fetchMock: ReturnType<typeof vi.fn>;
-
   const mockSuccessResponse: ReviewChecker = {
     isFake: false,
     confidence: 0.85,
@@ -26,14 +24,9 @@ describe('TrueStarApi', () => {
   };
 
   beforeEach(() => {
-    // Reset all mocks
     vi.clearAllMocks();
-
-    // Mock fetch globally
     fetchMock = vi.fn();
     global.fetch = fetchMock;
-
-    // Clear environment variables to ensure default URL
     vi.unstubAllEnvs();
   });
 
@@ -43,7 +36,7 @@ describe('TrueStarApi', () => {
   });
 
   describe('initialization', () => {
-    it('be properly instantiated', () => {
+    it('is properly instantiated', () => {
       expect(truestarApi).toBeDefined();
       expect(typeof truestarApi.analyzeReviews).toBe('function');
     });
@@ -67,7 +60,7 @@ describe('TrueStarApi', () => {
       },
     ];
 
-    it('successfully analyze reviews and return result', async () => {
+    it('successfully analyzes reviews and returns result', async () => {
       const mockApiResponse = {
         result: mockSuccessResponse,
       };
@@ -94,7 +87,7 @@ describe('TrueStarApi', () => {
       expect(result).toEqual(mockSuccessResponse);
     });
 
-    it('use correct API endpoint', async () => {
+    it('uses correct API endpoint', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -109,7 +102,7 @@ describe('TrueStarApi', () => {
       );
     });
 
-    it('handle HTTP error responses', async () => {
+    it('handles HTTP error responses', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: false,
         status: 500,
@@ -132,7 +125,7 @@ describe('TrueStarApi', () => {
       });
     });
 
-    it('handle network errors', async () => {
+    it('handles network errors', async () => {
       const networkError = new Error('Network error');
       fetchMock.mockRejectedValueOnce(networkError);
 
@@ -152,7 +145,7 @@ describe('TrueStarApi', () => {
       });
     });
 
-    it('handle JSON parsing errors', async () => {
+    it('handles JSON parsing errors', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -175,7 +168,7 @@ describe('TrueStarApi', () => {
       });
     });
 
-    it('handle different HTTP error status codes', async () => {
+    it('handles different HTTP error status codes', async () => {
       const testCases = [
         { status: 400, statusText: 'Bad Request' },
         { status: 401, statusText: 'Unauthorized' },
@@ -206,7 +199,7 @@ describe('TrueStarApi', () => {
       }
     });
 
-    it('handle empty reviews array', async () => {
+    it('handles empty reviews array', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -225,7 +218,7 @@ describe('TrueStarApi', () => {
       expect(result).toEqual(mockSuccessResponse);
     });
 
-    it('handle large review datasets', async () => {
+    it('handles large review datasets', async () => {
       const largeReviewSet: AmazonReview[] = Array.from(
         { length: 100 },
         (_, i) => ({
@@ -255,29 +248,26 @@ describe('TrueStarApi', () => {
       expect(result).toEqual(mockSuccessResponse);
     });
 
-    it('handle response with missing result field', async () => {
+    it('handles response with missing result field', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({}), // Missing result field
+        json: () => Promise.resolve({}),
       });
 
       const result = await truestarApi.analyzeReviews(mockReviews);
 
-      // Should handle undefined result gracefully
       expect(result).toBeUndefined();
     });
 
-    it('handle malformed API response structure', async () => {
+    it('handles malformed API response structure', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: () =>
           Promise.resolve({
             result: {
-              // Missing required fields
               isFake: true,
-              // confidence, reasons, flags, summary missing
             },
           }),
       });
@@ -286,12 +276,10 @@ describe('TrueStarApi', () => {
 
       expect(result).toEqual({
         isFake: true,
-        // Other fields should be undefined
       });
     });
 
-    it('warn when payload exceeds size limit', async () => {
-      // Create a very large review set that exceeds 1MB
+    it('warns when payload exceeds size limit', async () => {
       const veryLargeReviewSet: AmazonReview[] = Array.from(
         { length: 5000 },
         (_, i) => ({
@@ -313,7 +301,6 @@ describe('TrueStarApi', () => {
 
       await truestarApi.analyzeReviews(veryLargeReviewSet);
 
-      // Should log warning about large payload
       expect(log.warn).toHaveBeenCalledWith(
         expect.stringMatching(
           /Payload size \(\d+\.\d+ KB\) exceeds recommended limit of 1024 KB/
@@ -323,14 +310,14 @@ describe('TrueStarApi', () => {
   });
 
   describe('singleton behavior', () => {
-    it('export a consistent API instance', () => {
+    it('exports a consistent API instance', () => {
       expect(truestarApi).toBeDefined();
       expect(typeof truestarApi.analyzeReviews).toBe('function');
     });
   });
 
   describe('type safety', () => {
-    it('accept properly typed AmazonReview', async () => {
+    it('accepts properly typed AmazonReview', async () => {
       const validReview: AmazonReview = {
         id: 'RVALIDTEST123',
         rating: 4.5,
@@ -345,7 +332,6 @@ describe('TrueStarApi', () => {
         json: () => Promise.resolve({ result: mockSuccessResponse }),
       });
 
-      // Should compile and run without type errors
       const result: ReviewChecker = await truestarApi.analyzeReviews([
         validReview,
       ]);

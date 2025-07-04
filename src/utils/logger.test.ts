@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { log } from './logger';
 
-// Mock the sentry reporter module
 vi.mock('./sentry-reporter', () => ({
   SentryReporter: vi.fn().mockImplementation(() => ({
     reportError: vi.fn(),
@@ -33,13 +32,13 @@ describe('Logger', () => {
   });
 
   describe('info', () => {
-    it('log info messages with TrueStar prefix', () => {
+    it('logs info messages with TrueStar prefix', () => {
       log.info('Test message');
 
       expect(consoleSpy.info).toHaveBeenCalledWith('[TrueStar] Test message');
     });
 
-    it('pass additional arguments to console.info', () => {
+    it('passes additional arguments to console.info', () => {
       const obj = { test: 'data' };
       log.info('Test message', obj, 'extra');
 
@@ -52,7 +51,7 @@ describe('Logger', () => {
   });
 
   describe('warning', () => {
-    it('log warning messages with TrueStar prefix', () => {
+    it('logs warning messages with TrueStar prefix', () => {
       log.warn('Warning message');
 
       expect(consoleSpy.warn).toHaveBeenCalledWith(
@@ -60,7 +59,7 @@ describe('Logger', () => {
       );
     });
 
-    it('pass additional arguments to console.warn', () => {
+    it('passes additional arguments to console.warn', () => {
       const obj = { warning: 'data' };
       log.warn('Warning message', obj);
 
@@ -72,13 +71,13 @@ describe('Logger', () => {
   });
 
   describe('error', () => {
-    it('log error messages with TrueStar prefix', () => {
+    it('logs error messages with TrueStar prefix', () => {
       log.error('Error message');
 
       expect(consoleSpy.error).toHaveBeenCalledWith('[TrueStar] Error message');
     });
 
-    it('pass additional arguments to console.error', () => {
+    it('passes additional arguments to console.error', () => {
       const error = new Error('Test error');
       log.error('Error message', error, 'context');
 
@@ -91,7 +90,7 @@ describe('Logger', () => {
   });
 
   describe('error reporting integration', () => {
-    it('log errors normally regardless of error reporter availability', () => {
+    it('logs errors normally regardless of error reporter availability', () => {
       const error = new Error('Test error');
       log.error('Error occurred', error, 'context');
 
@@ -102,7 +101,7 @@ describe('Logger', () => {
       );
     });
 
-    it('handle case when no Error object is passed', () => {
+    it('handles case when no Error object is passed', () => {
       log.error('Simple error message', 'string data', { context: 'object' });
 
       expect(consoleSpy.error).toHaveBeenCalledWith(
@@ -114,7 +113,7 @@ describe('Logger', () => {
   });
 
   describe('singleton behavior', () => {
-    it('maintain consistent prefix across calls', () => {
+    it('maintains consistent prefix across calls', () => {
       log.info('First message');
       log.warn('Second message');
       log.error('Third message');

@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { fetchMultiplePages, fetchReviewPage } from './page-fetcher';
 
-describe('Page Fetcher', () => {
+describe('Page fetcher', () => {
   describe('fetchReviewPage', () => {
-    it('fetch a review page and return HTML', async () => {
+    it('fetches a review page and returns HTML', async () => {
       const mockHtml = '<html><body>Review page content</body></html>';
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -19,7 +19,7 @@ describe('Page Fetcher', () => {
       expect(global.fetch).toHaveBeenCalledWith(url);
     });
 
-    it('throw error when fetch fails', async () => {
+    it('throws error when fetch fails', async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: false,
         status: 404,

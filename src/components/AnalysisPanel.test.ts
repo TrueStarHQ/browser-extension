@@ -153,7 +153,6 @@ describe('AnalysisPanel', () => {
         },
       });
 
-      // Should not show red flags section when reasons is null
       expect(container.querySelector('details')).toBeFalsy();
     });
 
@@ -170,7 +169,6 @@ describe('AnalysisPanel', () => {
         },
       });
 
-      // Should not show red flags section when flags is null
       expect(container.querySelector('details')).toBeFalsy();
     });
 
@@ -205,7 +203,7 @@ describe('AnalysisPanel', () => {
         },
       });
 
-      expect(getByText('100%')).toBeTruthy(); // 0% confidence it's fake = 100% confidence it's real
+      expect(getByText('100%')).toBeTruthy();
       expect(getByText('Confidence: 0%')).toBeTruthy();
     });
 
@@ -256,7 +254,6 @@ describe('AnalysisPanel', () => {
         },
       });
 
-      // Should render all items including empty strings
       const listItems = getAllByRole('listitem');
       expect(listItems.length).toBe(6);
     });

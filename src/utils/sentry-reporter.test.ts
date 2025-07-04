@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SentryReporter } from './sentry-reporter';
 
-// Minimal mocks - only what's absolutely necessary
 vi.mock('@sentry/svelte');
 vi.mock('./user-preferences');
 
@@ -20,7 +19,6 @@ describe('SentryReporter', () => {
     vi.unstubAllEnvs();
   });
 
-  // Start with the simplest possible test
   it('can be created with a DSN', () => {
     const reporter = new SentryReporter('https://example@sentry.io/123');
     expect(reporter).toBeDefined();
@@ -37,7 +35,6 @@ describe('SentryReporter', () => {
       vi.mocked(Sentry.captureException).mockImplementation(
         () => 'event-id' as any
       );
-      // Mock the minimum needed for initialization
       vi.mocked(Sentry.getDefaultIntegrations).mockReturnValue([]);
       vi.mocked(Sentry.BrowserClient).mockImplementation(
         () => ({ init: vi.fn() }) as any
@@ -149,9 +146,7 @@ describe('SentryReporter', () => {
 
   describe('when error logging is disabled', () => {
     beforeEach(() => {
-      vi.mocked(preferences.isErrorLoggingEnabled).mockReturnValue(
-        false
-      );
+      vi.mocked(preferences.isErrorLoggingEnabled).mockReturnValue(false);
       vi.mocked(Sentry.captureException).mockImplementation(
         () => 'event-id' as any
       );
@@ -201,7 +196,6 @@ describe('SentryReporter', () => {
       vi.mocked(Sentry.captureException).mockImplementation(
         () => 'event-id' as any
       );
-      // Mock the minimum needed for initialization
       vi.mocked(Sentry.getDefaultIntegrations).mockReturnValue([]);
       vi.mocked(Sentry.BrowserClient).mockImplementation(
         () => ({ init: vi.fn() }) as any
@@ -324,7 +318,6 @@ describe('SentryReporter', () => {
     it('filters out problematic browser integrations', async () => {
       new SentryReporter('https://example@sentry.io/123');
 
-      // Wait for initialization
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       const clientConfig = vi.mocked(Sentry.BrowserClient).mock.calls[0]?.[0];
@@ -337,7 +330,6 @@ describe('SentryReporter', () => {
     it('does not send personally identifiable information', async () => {
       new SentryReporter('https://example@sentry.io/123');
 
-      // Wait for initialization
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       const clientConfig = vi.mocked(Sentry.BrowserClient).mock.calls[0]?.[0];
@@ -348,7 +340,6 @@ describe('SentryReporter', () => {
   describe('error handling', () => {
     beforeEach(() => {
       vi.mocked(preferences.isErrorLoggingEnabled).mockReturnValue(true);
-      // Mock the minimum needed for initialization
       vi.mocked(Sentry.getDefaultIntegrations).mockReturnValue([]);
       vi.mocked(Sentry.BrowserClient).mockImplementation(
         () => ({ init: vi.fn() }) as any

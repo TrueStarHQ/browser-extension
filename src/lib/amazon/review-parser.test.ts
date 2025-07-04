@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { parseReviewsFromHtml } from './review-parser';
 
-describe('Review Parser', () => {
+describe('Review parser', () => {
   describe('parseReviewsFromHtml', () => {
     it('extracts reviews from Amazon review page HTML', () => {
       const html = `
@@ -79,7 +79,6 @@ describe('Review Parser', () => {
     });
 
     it('generates fallback ID when review element has no ID', () => {
-      // Mock Date.now() and console.warn
       vi.useFakeTimers();
       vi.setSystemTime(new Date('2025-06-26T10:30:00Z'));
       const consoleWarnSpy = vi
@@ -111,11 +110,10 @@ describe('Review Parser', () => {
       expect(reviews[0]!.verified).toBe(false);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'TrueStar: Review element missing ID attribute, using fallback:',
+        '[TrueStar] Review element missing ID attribute, using fallback:',
         `UNKNOWN_${expectedTimestamp}_0`
       );
 
-      // Cleanup
       consoleWarnSpy.mockRestore();
       vi.useRealTimers();
     });
@@ -220,7 +218,6 @@ describe('Review Parser', () => {
       expect(reviews[0]!).toMatchObject({
         id: 'R4MNO901PQR234',
         helpfulVotes: 3,
-        // totalVotes should be undefined when not present
       });
       expect(reviews[0]!.totalVotes).toBeUndefined();
     });
@@ -242,7 +239,7 @@ describe('Review Parser', () => {
         `;
 
         const reviews = parseReviewsFromHtml(html);
-        expect(reviews).toHaveLength(0); // Should skip reviews without text
+        expect(reviews).toHaveLength(0);
       });
 
       it('handles reviews with special characters and HTML entities', () => {
@@ -332,7 +329,7 @@ describe('Review Parser', () => {
         `;
 
         const reviews = parseReviewsFromHtml(html);
-        expect(reviews).toHaveLength(0); // Should skip reviews with invalid ratings
+        expect(reviews).toHaveLength(0);
       });
 
       it('defaults to Anonymous for missing author names', () => {
@@ -371,7 +368,6 @@ describe('Review Parser', () => {
         `;
 
         const reviews = parseReviewsFromHtml(html);
-        // Parser should handle gracefully, extracting what it can
         expect(reviews.length).toBeLessThanOrEqual(1);
       });
     });
@@ -396,7 +392,7 @@ describe('Review Parser', () => {
         const reviews = parseReviewsFromHtml(html);
         expect(reviews).toHaveLength(1);
         expect(reviews[0]!.isVineReview).toBe(true);
-        expect(reviews[0]!.verified).toBe(false); // Vine reviews are not "verified purchases"
+        expect(reviews[0]!.verified).toBe(false);
       });
 
       it('extracts reviewer badges', () => {
@@ -477,7 +473,6 @@ describe('Review Parser', () => {
           'Top 500 Reviewer',
           'THE Hall of Famer',
         ]);
-        // Should not include "Verified Purchase" in badges array
         expect(reviews[0]!.badges).not.toContain('Verified Purchase');
       });
 

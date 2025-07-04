@@ -6,11 +6,11 @@ import { preferences, resetPreferencesForTesting } from './user-preferences';
 type StorageGetCallback = (result: Record<string, unknown>) => void;
 type StorageSetCallback = () => void;
 
-describe('Preferences', () => {
+describe('User preferences', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockChrome.runtime.lastError = null;
-    
+
     mockChrome.storage.local.get.mockImplementation(
       (_keys: string[], callback: StorageGetCallback) => {
         callback({});
@@ -21,7 +21,7 @@ describe('Preferences', () => {
         callback();
       }
     );
-    
+
     resetPreferencesForTesting();
   });
 
@@ -45,7 +45,7 @@ describe('Preferences', () => {
           callback({});
         }
       );
-      
+
       resetPreferencesForTesting();
 
       await expect(preferences.waitForLoad()).rejects.toThrow('Storage error');
@@ -62,7 +62,7 @@ describe('Preferences', () => {
           callback({ errorLoggingEnabled: true });
         }
       );
-      
+
       resetPreferencesForTesting();
 
       await preferences.waitForLoad();
@@ -99,7 +99,9 @@ describe('Preferences', () => {
     });
 
     it('logs error when storage fails', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       mockChrome.storage.local.set.mockImplementation(
         (_data: Record<string, unknown>, callback: StorageSetCallback) => {
@@ -165,7 +167,7 @@ describe('Preferences', () => {
 
   it('handles multiple setErrorLoggingEnabled calls correctly', () => {
     vi.clearAllMocks();
-    
+
     preferences.setErrorLoggingEnabled(true);
     preferences.setErrorLoggingEnabled(false);
     preferences.setErrorLoggingEnabled(true);
