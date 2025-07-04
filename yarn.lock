@@ -1140,9 +1140,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@truestar/browser-extension@workspace:.":
+"@truestarhq/browser-extension@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@truestar/browser-extension@workspace:."
+  resolution: "@truestarhq/browser-extension@workspace:."
   dependencies:
     "@crxjs/vite-plugin": "npm:^2.0.2"
     "@internationalized/date": "npm:^3.8.1"
