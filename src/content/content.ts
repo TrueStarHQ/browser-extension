@@ -2,11 +2,11 @@ import type { AmazonReview, ReviewChecker } from '@truestarhq/shared-types';
 
 import AnalysisPanel from '../components/AnalysisPanel.svelte';
 import LoadingIndicator from '../components/LoadingIndicator.svelte';
-import {
-  extractPaginationInfo,
-  generateReviewPageUrl,
-} from '../lib/amazon/amazon-pagination';
 import { fetchMultiplePages } from '../lib/amazon/page-fetcher';
+import {
+  buildReviewPageUrl,
+  extractPaginationInfo,
+} from '../lib/amazon/review-pagination';
 import { parseReviewsFromHtml } from '../lib/amazon/review-parser';
 import { selectPagesToFetch } from '../lib/amazon/review-sampling';
 import { truestarApi } from '../services/truestar-api';
@@ -89,7 +89,7 @@ class AmazonProductPageChecker {
 
       const urls = pagesToFetch
         .filter((pageNum) => pageNum !== 1)
-        .map((pageNum) => generateReviewPageUrl(productId, pageNum));
+        .map((pageNum) => buildReviewPageUrl(productId, pageNum));
 
       const fetchedPages = await fetchMultiplePages(urls);
 

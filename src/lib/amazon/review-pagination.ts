@@ -25,7 +25,7 @@ export function extractPaginationInfo(html: string): PaginationInfo {
   };
 }
 
-export function generateReviewPageUrl(
+export function buildReviewPageUrl(
   productId: string,
   pageNumber: number
 ): string {

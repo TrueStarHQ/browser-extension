@@ -1,11 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  extractPaginationInfo,
-  generateReviewPageUrl,
-} from './amazon-pagination';
+import { buildReviewPageUrl, extractPaginationInfo } from './review-pagination';
 
-describe('Amazon pagination analysis', () => {
+describe('Amazon pagination', () => {
   describe('extractPaginationInfo', () => {
     it('extracts total review count from the page', () => {
       const html = `
@@ -44,12 +41,12 @@ describe('Amazon pagination analysis', () => {
     });
   });
 
-  describe('generateReviewPageUrl', () => {
+  describe('buildReviewPageUrl', () => {
     it('generates URL for a specific review page', () => {
       const productId = 'B08N5WRWNW';
       const pageNumber = 2;
 
-      const url = generateReviewPageUrl(productId, pageNumber);
+      const url = buildReviewPageUrl(productId, pageNumber);
 
       expect(url).toBe(
         'https://www.amazon.com/product-reviews/B08N5WRWNW?pageNumber=2'
