@@ -3,7 +3,7 @@ import type { AmazonReview, ReviewChecker } from '@truestarhq/shared-types';
 import AnalysisPanel from '../components/AnalysisPanel.svelte';
 import LoadingIndicator from '../components/LoadingIndicator.svelte';
 import {
-  analyzeReviewPagination,
+  extractPaginationInfo,
   generateReviewPageUrl,
 } from '../lib/amazon/amazon-pagination';
 import { fetchMultiplePages } from '../lib/amazon/page-fetcher';
@@ -71,7 +71,7 @@ class AmazonProductPageChecker {
       const currentPageReviews = this.extractReviews();
       log.info(`Found ${currentPageReviews.length} reviews on current page`);
 
-      const paginationInfo = analyzeReviewPagination(
+      const paginationInfo = extractPaginationInfo(
         document.documentElement.innerHTML
       );
       log.info(

@@ -5,7 +5,7 @@ export interface PaginationInfo {
 
 const REVIEWS_PER_PAGE = 10;
 
-export function analyzeReviewPagination(html: string): PaginationInfo {
+export function extractPaginationInfo(html: string): PaginationInfo {
   const reviewCountMatch = html.match(/(\d+(?:,\d+)*)\s+global reviews/);
 
   if (reviewCountMatch && reviewCountMatch[1]) {

@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  analyzeReviewPagination,
+  extractPaginationInfo,
   generateReviewPageUrl,
 } from './amazon-pagination';
 
 describe('Amazon pagination analysis', () => {
-  describe('analyzeReviewPagination', () => {
+  describe('extractPaginationInfo', () => {
     it('extracts total review count from the page', () => {
       const html = `
         <div data-hook="cr-filter-info-review-rating-count">
@@ -14,7 +14,7 @@ describe('Amazon pagination analysis', () => {
         </div>
       `;
 
-      const result = analyzeReviewPagination(html);
+      const result = extractPaginationInfo(html);
 
       expect(result.totalReviews).toBe(2156);
     });
@@ -26,7 +26,7 @@ describe('Amazon pagination analysis', () => {
         </div>
       `;
 
-      const result = analyzeReviewPagination(html);
+      const result = extractPaginationInfo(html);
 
       expect(result.totalReviews).toBe(89);
     });
@@ -38,7 +38,7 @@ describe('Amazon pagination analysis', () => {
         </div>
       `;
 
-      const result = analyzeReviewPagination(html);
+      const result = extractPaginationInfo(html);
 
       expect(result.totalPages).toBe(216);
     });
@@ -65,7 +65,7 @@ describe('Amazon pagination analysis', () => {
         </div>
       `;
 
-      const result = analyzeReviewPagination(html);
+      const result = extractPaginationInfo(html);
 
       expect(result.totalReviews).toBe(7);
       expect(result.totalPages).toBe(1);
@@ -78,7 +78,7 @@ describe('Amazon pagination analysis', () => {
         </div>
       `;
 
-      const result = analyzeReviewPagination(html);
+      const result = extractPaginationInfo(html);
 
       expect(result.totalReviews).toBe(10);
       expect(result.totalPages).toBe(1);
@@ -91,7 +91,7 @@ describe('Amazon pagination analysis', () => {
         </div>
       `;
 
-      const result = analyzeReviewPagination(html);
+      const result = extractPaginationInfo(html);
 
       expect(result.totalReviews).toBe(11);
       expect(result.totalPages).toBe(2);
@@ -104,7 +104,7 @@ describe('Amazon pagination analysis', () => {
         </div>
       `;
 
-      const result = analyzeReviewPagination(html);
+      const result = extractPaginationInfo(html);
 
       expect(result.totalReviews).toBe(0);
       expect(result.totalPages).toBe(0);
@@ -117,7 +117,7 @@ describe('Amazon pagination analysis', () => {
         </div>
       `;
 
-      const result = analyzeReviewPagination(html);
+      const result = extractPaginationInfo(html);
 
       expect(result.totalReviews).toBe(0);
       expect(result.totalPages).toBe(0);
@@ -130,7 +130,7 @@ describe('Amazon pagination analysis', () => {
         </div>
       `;
 
-      const result = analyzeReviewPagination(html);
+      const result = extractPaginationInfo(html);
 
       expect(result.totalReviews).toBe(23567);
       expect(result.totalPages).toBe(2357);
@@ -143,7 +143,7 @@ describe('Amazon pagination analysis', () => {
         </div>
       `;
 
-      const result = analyzeReviewPagination(html);
+      const result = extractPaginationInfo(html);
 
       expect(result.totalReviews).toBeGreaterThanOrEqual(0);
     });
