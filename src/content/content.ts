@@ -2,7 +2,7 @@ import type { AmazonReview, ReviewChecker } from '@truestarhq/shared-types';
 
 import AnalysisPanel from '../components/AnalysisPanel.svelte';
 import LoadingIndicator from '../components/LoadingIndicator.svelte';
-import { fetchMultiplePages } from '../lib/amazon/page-fetcher';
+import { fetchMultiplePages } from '../lib/amazon/review-page-fetcher';
 import {
   buildReviewPageUrl,
   extractPaginationInfo,

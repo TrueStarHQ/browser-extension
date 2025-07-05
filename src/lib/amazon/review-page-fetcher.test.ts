@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { fetchMultiplePages, fetchReviewPage } from './page-fetcher';
+import { fetchMultiplePages, fetchReviewPage } from './review-page-fetcher';
 
 describe('Amazon review page fetcher', () => {
   describe('fetchReviewPage', () => {
