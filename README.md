@@ -18,29 +18,29 @@ This extension analyzes product reviews on Amazon and provides insights about re
 
 ```bash
 # Install dependencies
-yarn install
+pnpm install
 
 # Start development server
-yarn dev
+pnpm dev
 
 # Build extension
-yarn build
+pnpm build
 
 # Run tests
-yarn test
+pnpm test
 
 # Type checking
-yarn check
+pnpm check
 
 # Linting
-yarn lint
+pnpm lint
 ```
 
 ## Building for Production
 
 ```bash
 # Build the extension
-yarn build
+pnpm build
 
 # Output will be in dist/ directory
 ```
