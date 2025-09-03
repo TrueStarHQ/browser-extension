@@ -4,7 +4,6 @@ import type {
 } from '@truestarhq/shared-types';
 
 import AnalysisPanel from '../components/AnalysisPanel.svelte';
-import LoadingIndicator from '../components/LoadingIndicator.svelte';
 import { extractReviewsCSRFToken } from '../lib/amazon/csrf-token';
 import { fetchReviewPage } from '../lib/amazon/review-page-fetcher';
 import { extractPaginationInfo } from '../lib/amazon/review-pagination';
@@ -31,7 +30,6 @@ function isValidAnalysisResult(
 }
 
 class AmazonProductPageChecker {
-  private loadingComponent: ReturnType<typeof mountComponent> | null = null;
   private analysisComponent: ReturnType<typeof mountComponent> | null = null;
 
   constructor() {
@@ -54,11 +52,11 @@ class AmazonProductPageChecker {
   private extractAsinFromUrl(): string {
     const match = window.location.pathname.match(/\/dp\/([A-Z0-9]+)/);
 
-    if (!match) {
+    if (!match || !match[1]) {
       throw new Error('Could not extract ASIN from URL');
     }
 
-    return match[1]!;
+    return match[1];
   }
 
   private async extractMultiPageReviewsViaAjax(): Promise<{
@@ -67,7 +65,6 @@ class AmazonProductPageChecker {
   }> {
     const productId = this.extractAsinFromUrl();
 
-    // Extract the anti-CSRF token from the current page
     const csrfToken = extractReviewsCSRFToken(
       document.documentElement.innerHTML
     );
@@ -76,7 +73,6 @@ class AmazonProductPageChecker {
       throw new Error('Could not extract CSRF token from page');
     }
 
-    // Get pagination info from current page
     const paginationInfo = extractPaginationInfo(
       document.documentElement.innerHTML
     );
@@ -86,21 +82,18 @@ class AmazonProductPageChecker {
       log.warn('No pagination found - product may have no reviews');
     }
 
-    // Collect reviews - fetch up to 10 pages (Amazon's limit) or fewer if less than 100 reviews
     const pagesToFetch = Math.min(paginationInfo.totalPages, 10);
     const pageNumbers = Array.from({ length: pagesToFetch }, (_, i) => i + 1);
 
-    // Fetch all pages simultaneously
     const pagePromises = pageNumbers.map((pageNum) =>
       fetchReviewPage(productId, pageNum, csrfToken).catch((error) => {
         log.warn(`Failed to fetch reviews page ${pageNum}:`, error);
-        return []; // Return empty array on error to continue with other pages
+        return [];
       })
     );
 
     const allPageResults = await Promise.all(pagePromises);
 
-    // Flatten and deduplicate reviews
     const allReviews: AmazonReview[] = [];
     const seenIds = new Set<string>();
 
@@ -125,28 +118,13 @@ class AmazonProductPageChecker {
         await this.extractMultiPageReviewsViaAjax();
       if (reviews.length === 0) {
         log.info('No reviews found on page');
-        this.hideLoadingIndicator();
         return;
       }
 
       const result = await this.checkReviews(reviews, totalReviewCount);
-      this.hideLoadingIndicator();
       this.displayResults(result);
     } catch (error) {
       log.error('Error analyzing reviews:', error);
-      this.hideLoadingIndicator();
-    }
-  }
-
-  private showLoadingIndicator(): void {
-    this.hideLoadingIndicator(); // Remove any existing loader
-    this.loadingComponent = mountComponent(LoadingIndicator, {});
-  }
-
-  private hideLoadingIndicator(): void {
-    if (this.loadingComponent) {
-      this.loadingComponent.destroy();
-      this.loadingComponent = null;
     }
   }
 
@@ -184,7 +162,6 @@ class AmazonProductPageChecker {
       this.analysisComponent.destroy();
     }
 
-    // Create an error response that matches CheckAmazonProductResponse structure
     const errorAnalysis: CheckAmazonProductResponse = {
       timestamp: new Date().toISOString(),
       summary: {

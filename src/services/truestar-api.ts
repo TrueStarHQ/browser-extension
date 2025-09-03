@@ -7,7 +7,7 @@ import { log } from '../utils/logger';
 
 class TrueStarApi {
   private baseUrl: string;
-  private readonly MAX_PAYLOAD_SIZE_KB = 1024; // 1MB limit
+  private readonly MAX_PAYLOAD_SIZE_KB = 1024;
 
   constructor() {
     this.baseUrl =
@@ -57,7 +57,6 @@ class TrueStarApi {
     } catch (error) {
       log.error('Backend API error:', error);
 
-      // Return a minimal error response that matches the API structure
       return {
         timestamp: new Date().toISOString(),
         summary: {

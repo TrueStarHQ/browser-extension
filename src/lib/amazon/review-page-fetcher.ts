@@ -39,10 +39,6 @@ export class AmazonParseError extends Error {
   }
 }
 
-/**
- * Fetches reviews using Amazon's AJAX endpoints
- * These endpoints require proper session cookies to work
- */
 export async function fetchReviewPage(
   productId: string,
   pageNumber: number,
@@ -79,9 +75,6 @@ export async function fetchReviewPage(
   }
 }
 
-/**
- * Makes the AJAX request to Amazon's review endpoint
- */
 async function makeAjaxRequest(options: AjaxFetchOptions): Promise<Response> {
   const { productId, pageNumber, csrfToken, sortBy = 'recent' } = options;
 
@@ -115,16 +108,10 @@ async function makeAjaxRequest(options: AjaxFetchOptions): Promise<Response> {
   return response;
 }
 
-/**
- * Builds the URL for fetching a page of reviews
- */
 function buildRequestUrl(pageNumber: number): string {
   return `https://www.amazon.com/hz/reviews-render/ajax/reviews/get/ref=cm_cr_getr_d_paging_btm_next_${pageNumber}`;
 }
 
-/**
- * Parses Amazon's AJAX response format to extract review HTML
- */
 function parseResponse(responseText: string): AmazonReview[] {
   if (!responseText.includes(AMAZON_AJAX_DELIMITER)) {
     return [];
@@ -139,9 +126,6 @@ function parseResponse(responseText: string): AmazonReview[] {
   return parseReviewsFromHtml(reviewHtml);
 }
 
-/**
- * Extracts review HTML content from Amazon's command-based response format
- */
 function extractReviewHtmlFromCommands(responseText: string): string {
   const commands = responseText.split(AMAZON_AJAX_DELIMITER);
   let reviewHtml = '';
@@ -156,9 +140,6 @@ function extractReviewHtmlFromCommands(responseText: string): string {
   return reviewHtml;
 }
 
-/**
- * Extracts HTML content from a single Amazon AJAX command
- */
 function extractHtmlFromCommand(commandString: string): string | null {
   try {
     const parsed = JSON.parse(commandString.trim()) as AmazonAjaxCommand;
@@ -175,21 +156,14 @@ function extractHtmlFromCommand(commandString: string): string | null {
 
     return null;
   } catch {
-    // Skip unparseable commands
     return null;
   }
 }
 
-/**
- * Checks if a command is an append action
- */
 function isAppendCommand(command: unknown): command is AmazonAjaxCommand {
   return Array.isArray(command) && command[0] === AMAZON_AJAX_APPEND_ACTION;
 }
 
-/**
- * Checks if content contains review data
- */
 function isReviewContent(content: unknown): content is string {
   return (
     typeof content === 'string' && content.includes(AMAZON_REVIEW_DATA_HOOK)

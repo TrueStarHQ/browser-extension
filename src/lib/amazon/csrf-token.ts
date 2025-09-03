@@ -1,12 +1,7 @@
 import { log } from '../../utils/logger';
 
-/**
- * Extracts the anti-CSRF token from Amazon product pages
- * The token is consistently found in the cr-state-object span element
- */
 export function extractReviewsCSRFToken(html: string): string | null {
   try {
-    // Find the reviewsCsrfToken in the cr-state-object
     const stateObjectPattern =
       /<span[^>]*id=["']cr-state-object["'][^>]*data-state=["']([^"']+)["'][^>]*>/i;
     const stateMatch = html.match(stateObjectPattern);
@@ -16,7 +11,6 @@ export function extractReviewsCSRFToken(html: string): string | null {
       return null;
     }
 
-    // The data-state attribute should contain valid JSON
     let stateJson = stateMatch[1];
 
     stateJson = stateJson
