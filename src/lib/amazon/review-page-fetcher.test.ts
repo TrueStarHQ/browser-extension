@@ -1,65 +1,205 @@
-import { describe, expect, it, vi } from 'vitest';
+import type { AmazonReview } from '@truestarhq/shared-types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { fetchMultiplePages, fetchReviewPage } from './review-page-fetcher';
+import {
+  AmazonFetchError,
+  AmazonParseError,
+  fetchReviewPage,
+} from './review-page-fetcher';
+import { parseReviewsFromHtml } from './review-parser';
 
-describe('Amazon review page fetcher', () => {
+vi.mock('./review-parser');
+vi.mock('../../utils/logger', () => ({
+  log: {
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+  },
+}));
+
+describe('review-page-fetcher', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    global.fetch = vi.fn();
+  });
+
   describe('fetchReviewPage', () => {
-    it('fetches a review page and returns HTML', async () => {
-      const mockHtml = '<html><body>Review page content</body></html>';
-      global.fetch = vi.fn().mockResolvedValue({
+    it('should fetch and parse reviews successfully', async () => {
+      const mockReviews: AmazonReview[] = [
+        {
+          id: 'R123',
+          rating: 5,
+          title: 'Great product',
+          text: 'Love it!',
+          authorName: 'John Doe',
+          isVerifiedPurchase: true,
+          isVineReview: false,
+        },
+      ];
+
+      const mockResponseText = `
+        ["append", null, "<div data-hook=\\"review\\">Review 1</div>"]
+        &&&
+        ["append", null, "<div data-hook=\\"review\\">Review 2</div>"]
+      `;
+
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         ok: true,
-        text: vi.fn().mockResolvedValue(mockHtml),
+        text: async () => mockResponseText,
       });
 
-      const url =
-        'https://www.amazon.com/product-reviews/B08N5WRWNW?pageNumber=2';
-      const result = await fetchReviewPage(url);
+      (parseReviewsFromHtml as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+        mockReviews
+      );
 
-      expect(result).toBe(mockHtml);
-      expect(global.fetch).toHaveBeenCalledWith(url);
+      const result = await fetchReviewPage('B08XYZ123', 1, 'test-csrf-token');
+
+      expect(result).toEqual(mockReviews);
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('amazon.com/hz/reviews-render/ajax'),
+        expect.objectContaining({
+          method: 'POST',
+          credentials: 'include',
+          headers: expect.objectContaining({
+            'anti-csrftoken-a2z': 'test-csrf-token',
+            'content-type': 'application/x-www-form-urlencoded',
+          }),
+        })
+      );
     });
 
-    it('throws error when fetch fails', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+    it('should handle fetch errors with AmazonFetchError', async () => {
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         ok: false,
-        status: 404,
-        statusText: 'Not Found',
+        status: 403,
+        statusText: 'Forbidden',
       });
 
-      const url = 'https://www.amazon.com/product-reviews/INVALID?pageNumber=2';
+      const result = await fetchReviewPage('B08XYZ123', 1, 'test-csrf-token');
 
-      await expect(fetchReviewPage(url)).rejects.toThrow(
-        'Failed to fetch page: 404 Not Found'
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array when no reviews found', async () => {
+      const mockResponseText = 'No reviews in this response';
+
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        text: async () => mockResponseText,
+      });
+
+      const result = await fetchReviewPage('B08XYZ123', 1, 'test-csrf-token');
+
+      expect(result).toEqual([]);
+      expect(parseReviewsFromHtml).not.toHaveBeenCalled();
+    });
+
+    it('should handle malformed JSON in response gracefully', async () => {
+      const mockResponseText = `
+        ["append", null, "<div data-hook=\\"review\\">Review 1</div>"]
+        &&&
+        {invalid json}
+        &&&
+        ["append", null, "<div data-hook=\\"review\\">Review 2</div>"]
+      `;
+
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        text: async () => mockResponseText,
+      });
+
+      (parseReviewsFromHtml as ReturnType<typeof vi.fn>).mockReturnValueOnce([
+        {
+          id: 'R123',
+          rating: 5,
+          title: 'Test',
+          text: 'Test review',
+          authorName: 'Test Author',
+          isVerifiedPurchase: false,
+          isVineReview: false,
+        },
+      ]);
+
+      const result = await fetchReviewPage('B08XYZ123', 1, 'test-csrf-token');
+
+      expect(result).toHaveLength(1);
+      expect(parseReviewsFromHtml).toHaveBeenCalled();
+    });
+
+    it('should handle network errors', async () => {
+      (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        new Error('Network error')
+      );
+
+      const result = await fetchReviewPage('B08XYZ123', 1, 'test-csrf-token');
+
+      expect(result).toEqual([]);
+    });
+
+    it('should extract review HTML from various command formats', async () => {
+      const mockResponseText = `
+        ["append", null, "<div data-hook=\\"review\\">Review with content at index 2</div>"]
+        &&&
+        ["append", "<div data-hook=\\"review\\">Review with content at index 1</div>"]
+        &&&
+        ["other-action", "some-selector", "non-review content"]
+      `;
+
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        text: async () => mockResponseText,
+      });
+
+      (parseReviewsFromHtml as ReturnType<typeof vi.fn>).mockReturnValueOnce([
+        {
+          id: 'R1',
+          rating: 4,
+          title: 'Good',
+          text: 'Nice product',
+          authorName: 'Jane',
+          isVerifiedPurchase: true,
+          isVineReview: false,
+        },
+        {
+          id: 'R2',
+          rating: 3,
+          title: 'OK',
+          text: 'Average',
+          authorName: 'Bob',
+          isVerifiedPurchase: false,
+          isVineReview: false,
+        },
+      ]);
+
+      const result = await fetchReviewPage('B08XYZ123', 2, 'test-csrf-token');
+
+      expect(result).toHaveLength(2);
+      expect(parseReviewsFromHtml).toHaveBeenCalledWith(
+        expect.stringContaining('Review with content at index 2')
+      );
+      expect(parseReviewsFromHtml).toHaveBeenCalledWith(
+        expect.stringContaining('Review with content at index 1')
       );
     });
   });
 
-  describe('fetchMultiplePages', () => {
-    it('fetches multiple pages sequentially with delays', async () => {
-      const mockResponses: Record<string, string> = {
-        'https://www.amazon.com/product-reviews/B08N5WRWNW?pageNumber=1':
-          '<html>Page 1</html>',
-        'https://www.amazon.com/product-reviews/B08N5WRWNW?pageNumber=2':
-          '<html>Page 2</html>',
-        'https://www.amazon.com/product-reviews/B08N5WRWNW?pageNumber=3':
-          '<html>Page 3</html>',
-      };
+  describe('Error classes', () => {
+    it('should create AmazonFetchError with correct properties', () => {
+      const error = new AmazonFetchError('Test error', 404, 'B123', 2);
 
-      global.fetch = vi.fn().mockImplementation((url: string) => {
-        return Promise.resolve({
-          ok: true,
-          text: vi.fn().mockResolvedValue(mockResponses[url]),
-        });
-      });
+      expect(error.name).toBe('AmazonFetchError');
+      expect(error.message).toBe('Test error');
+      expect(error.statusCode).toBe(404);
+      expect(error.productId).toBe('B123');
+      expect(error.pageNumber).toBe(2);
+    });
 
-      const urls = Object.keys(mockResponses);
-      const results = await fetchMultiplePages(urls);
+    it('should create AmazonParseError with correct properties', () => {
+      const error = new AmazonParseError('Parse failed', 'response text');
 
-      expect(results).toHaveLength(3);
-      expect(results[0]!.url).toBe(urls[0]);
-      expect(results[0]!.html).toBe(mockResponses[urls[0]!]);
-      expect(results[1]!.url).toBe(urls[1]);
-      expect(results[1]!.html).toBe(mockResponses[urls[1]!]);
+      expect(error.name).toBe('AmazonParseError');
+      expect(error.message).toBe('Parse failed');
+      expect(error.responseText).toBe('response text');
     });
   });
 });

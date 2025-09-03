@@ -1,4 +1,7 @@
-import type { AmazonReview, ReviewChecker } from '@truestarhq/shared-types';
+import type {
+  AmazonReview,
+  CheckAmazonProductResponse,
+} from '@truestarhq/shared-types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { truestarApi } from './truestar-api';
@@ -15,12 +18,22 @@ import { log } from '../utils/logger';
 
 describe('TrueStarApi', () => {
   let fetchMock: ReturnType<typeof vi.fn>;
-  const mockSuccessResponse: ReviewChecker = {
-    isFake: false,
-    confidence: 0.85,
-    reasons: ['Varied writing styles', 'Mix of positive and negative'],
-    flags: [],
-    summary: 'Reviews appear to be authentic',
+  const mockSuccessResponse: CheckAmazonProductResponse = {
+    timestamp: '2024-01-01T00:00:00Z',
+    summary: {
+      trustScore: 85,
+    },
+    metrics: {
+      analyzed: 10,
+      total: 50,
+    },
+    greenFlags: [
+      {
+        type: 'high_verified_purchases',
+        confidence: 0.9,
+        details: { percentage: 90 },
+      },
+    ],
   };
 
   beforeEach(() => {
@@ -47,34 +60,32 @@ describe('TrueStarApi', () => {
       {
         id: 'R1TEST123456789',
         rating: 5,
+        title: 'Excellent product',
         text: 'Great product, highly recommend!',
-        author: 'John Doe',
-        verified: true,
+        authorName: 'John Doe',
+        isVerifiedPurchase: true,
       },
       {
         id: 'R2TEST987654321',
         rating: 1,
+        title: 'Disappointed',
         text: 'Terrible quality, waste of money',
-        author: 'Jane Smith',
-        verified: false,
+        authorName: 'Jane Smith',
+        isVerifiedPurchase: false,
       },
     ];
 
     it('successfully analyzes reviews and returns result', async () => {
-      const mockApiResponse = {
-        result: mockSuccessResponse,
-      };
-
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve(mockApiResponse),
+        json: () => Promise.resolve(mockSuccessResponse),
       });
 
       const result = await truestarApi.analyzeReviews(mockReviews);
 
       expect(fetchMock).toHaveBeenCalledWith(
-        'http://localhost:3001/check/amazon/reviews',
+        'http://localhost:3001/check/amazon/product',
         {
           method: 'POST',
           headers: {
@@ -87,17 +98,44 @@ describe('TrueStarApi', () => {
       expect(result).toEqual(mockSuccessResponse);
     });
 
+    it('includes totalReviewCount when provided', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve(mockSuccessResponse),
+      });
+
+      const totalReviewCount = 1500;
+      const result = await truestarApi.analyzeReviews(
+        mockReviews,
+        totalReviewCount
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://localhost:3001/check/amazon/product',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ reviews: mockReviews, totalReviewCount }),
+        }
+      );
+
+      expect(result).toEqual(mockSuccessResponse);
+    });
+
     it('uses correct API endpoint', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ result: mockSuccessResponse }),
+        json: () => Promise.resolve(mockSuccessResponse),
       });
 
       await truestarApi.analyzeReviews(mockReviews);
 
       expect(fetchMock).toHaveBeenCalledWith(
-        'http://localhost:3001/check/amazon/reviews',
+        'http://localhost:3001/check/amazon/product',
         expect.any(Object)
       );
     });
@@ -116,13 +154,9 @@ describe('TrueStarApi', () => {
         expect.any(Error)
       );
 
-      expect(result).toEqual({
-        isFake: false,
-        confidence: 0,
-        reasons: ['Unable to connect to analysis service'],
-        flags: [],
-        summary: 'Analysis service temporarily unavailable',
-      });
+      expect(result.summary.trustScore).toBe(0);
+      expect(result.metrics.analyzed).toBe(0);
+      expect(result.metrics.total).toBe(0);
     });
 
     it('handles network errors', async () => {
@@ -136,13 +170,9 @@ describe('TrueStarApi', () => {
         networkError
       );
 
-      expect(result).toEqual({
-        isFake: false,
-        confidence: 0,
-        reasons: ['Unable to connect to analysis service'],
-        flags: [],
-        summary: 'Analysis service temporarily unavailable',
-      });
+      expect(result.summary.trustScore).toBe(0);
+      expect(result.metrics.analyzed).toBe(0);
+      expect(result.metrics.total).toBe(0);
     });
 
     it('handles JSON parsing errors', async () => {
@@ -159,13 +189,9 @@ describe('TrueStarApi', () => {
         expect.any(Error)
       );
 
-      expect(result).toEqual({
-        isFake: false,
-        confidence: 0,
-        reasons: ['Unable to connect to analysis service'],
-        flags: [],
-        summary: 'Analysis service temporarily unavailable',
-      });
+      expect(result.summary.trustScore).toBe(0);
+      expect(result.metrics.analyzed).toBe(0);
+      expect(result.metrics.total).toBe(0);
     });
 
     it('handles different HTTP error status codes', async () => {
@@ -187,23 +213,25 @@ describe('TrueStarApi', () => {
 
         const result = await truestarApi.analyzeReviews(mockReviews);
 
-        expect(result).toEqual({
-          isFake: false,
-          confidence: 0,
-          reasons: ['Unable to connect to analysis service'],
-          flags: [],
-          summary: 'Analysis service temporarily unavailable',
-        });
+        expect(result.summary.trustScore).toBe(0);
+        expect(result.metrics.analyzed).toBe(0);
+        expect(result.metrics.total).toBe(0);
 
         vi.clearAllMocks();
       }
     });
 
     it('handles empty reviews array', async () => {
+      const emptyResponse: CheckAmazonProductResponse = {
+        timestamp: '2024-01-01T00:00:00Z',
+        summary: { trustScore: 50 },
+        metrics: { analyzed: 0, total: 0 },
+      };
+
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ result: mockSuccessResponse }),
+        json: () => Promise.resolve(emptyResponse),
       });
 
       const result = await truestarApi.analyzeReviews([]);
@@ -215,7 +243,7 @@ describe('TrueStarApi', () => {
         })
       );
 
-      expect(result).toEqual(mockSuccessResponse);
+      expect(result).toEqual(emptyResponse);
     });
 
     it('handles large review datasets', async () => {
@@ -224,16 +252,17 @@ describe('TrueStarApi', () => {
         (_, i) => ({
           id: `R${i}LARGE`,
           rating: Math.floor(Math.random() * 5) + 1,
+          title: `Review Title ${i}`,
           text: `Review ${i} with some content`,
-          author: `User${i}`,
-          verified: Math.random() > 0.5,
+          authorName: `User${i}`,
+          isVerifiedPurchase: Math.random() > 0.5,
         })
       );
 
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ result: mockSuccessResponse }),
+        json: () => Promise.resolve(mockSuccessResponse),
       });
 
       const result = await truestarApi.analyzeReviews(largeReviewSet);
@@ -248,7 +277,7 @@ describe('TrueStarApi', () => {
       expect(result).toEqual(mockSuccessResponse);
     });
 
-    it('handles response with missing result field', async () => {
+    it('handles response with missing required fields', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -257,26 +286,26 @@ describe('TrueStarApi', () => {
 
       const result = await truestarApi.analyzeReviews(mockReviews);
 
-      expect(result).toBeUndefined();
+      // Should return the partial response
+      expect(result).toEqual({});
     });
 
     it('handles malformed API response structure', async () => {
+      const partialResponse = {
+        summary: {
+          trustScore: 30,
+        },
+      };
+
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () =>
-          Promise.resolve({
-            result: {
-              isFake: true,
-            },
-          }),
+        json: () => Promise.resolve(partialResponse),
       });
 
       const result = await truestarApi.analyzeReviews(mockReviews);
 
-      expect(result).toEqual({
-        isFake: true,
-      });
+      expect(result).toEqual(partialResponse);
     });
 
     it('warns when payload exceeds size limit', async () => {
@@ -285,18 +314,19 @@ describe('TrueStarApi', () => {
         (_, i) => ({
           id: `R${i}VERYLONGID`,
           rating: 5,
+          title: `Long Review ${i}`,
           text: 'This is a very long review text that contains a lot of content to make the payload size larger. '.repeat(
             10
           ),
-          author: `UserWithVeryLongName${i}`,
-          verified: true,
+          authorName: `UserWithVeryLongName${i}`,
+          isVerifiedPurchase: true,
         })
       );
 
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ result: mockSuccessResponse }),
+        json: () => Promise.resolve(mockSuccessResponse),
       });
 
       await truestarApi.analyzeReviews(veryLargeReviewSet);
@@ -321,20 +351,20 @@ describe('TrueStarApi', () => {
       const validReview: AmazonReview = {
         id: 'RVALIDTEST123',
         rating: 4.5,
+        title: 'Good quality',
         text: 'Good product',
-        author: 'Test User',
-        verified: true,
+        authorName: 'Test User',
+        isVerifiedPurchase: true,
       };
 
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ result: mockSuccessResponse }),
+        json: () => Promise.resolve(mockSuccessResponse),
       });
 
-      const result: ReviewChecker = await truestarApi.analyzeReviews([
-        validReview,
-      ]);
+      const result: CheckAmazonProductResponse =
+        await truestarApi.analyzeReviews([validReview]);
 
       expect(result).toEqual(mockSuccessResponse);
     });

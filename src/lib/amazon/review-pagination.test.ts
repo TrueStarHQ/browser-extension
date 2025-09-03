@@ -1,26 +1,40 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildReviewPageUrl, extractPaginationInfo } from './review-pagination';
+import { extractPaginationInfo } from './review-pagination';
 
 describe('Amazon pagination', () => {
   describe('extractPaginationInfo', () => {
-    it('extracts total review count from the page', () => {
+    it('extracts total review count from data-hook attribute', () => {
       const html = `
-        <div data-hook="cr-filter-info-review-rating-count">
-          <span>10,234 global ratings | 2,156 global reviews</span>
-        </div>
+        <span data-hook="total-review-count" class="a-size-base a-color-secondary">
+          30,230 global ratings
+        </span>
       `;
 
       const result = extractPaginationInfo(html);
 
-      expect(result.totalReviews).toBe(2156);
+      expect(result.totalReviews).toBe(30230);
+      expect(result.totalPages).toBe(3023);
     });
 
-    it('handles different review count formats', () => {
+    it('handles European number format with periods as thousands separators', () => {
       const html = `
-        <div data-hook="cr-filter-info-review-rating-count">
-          <span>567 global ratings | 89 global reviews</span>
-        </div>
+        <span data-hook="total-review-count">
+          1.234.567 Bewertungen
+        </span>
+      `;
+
+      const result = extractPaginationInfo(html);
+
+      expect(result.totalReviews).toBe(1234567);
+      expect(result.totalPages).toBe(123457);
+    });
+
+    it('handles mixed format with spaces', () => {
+      const html = `
+        <span data-hook="total-review-count">
+          89 customer reviews
+        </span>
       `;
 
       const result = extractPaginationInfo(html);
@@ -30,9 +44,9 @@ describe('Amazon pagination', () => {
 
     it('calculates total pages based on reviews per page', () => {
       const html = `
-        <div data-hook="cr-filter-info-review-rating-count">
-          <span>10,234 global ratings | 2,156 global reviews</span>
-        </div>
+        <span data-hook="total-review-count">
+          2,156 customer reviews
+        </span>
       `;
 
       const result = extractPaginationInfo(html);
@@ -41,25 +55,10 @@ describe('Amazon pagination', () => {
     });
   });
 
-  describe('buildReviewPageUrl', () => {
-    it('generates URL for a specific review page', () => {
-      const productId = 'B08N5WRWNW';
-      const pageNumber = 2;
-
-      const url = buildReviewPageUrl(productId, pageNumber);
-
-      expect(url).toBe(
-        'https://www.amazon.com/product-reviews/B08N5WRWNW?pageNumber=2'
-      );
-    });
-  });
-
   describe('edge cases', () => {
     it('handles single page of reviews (less than 10)', () => {
       const html = `
-        <div data-hook="cr-filter-info-review-rating-count">
-          <span>15 global ratings | 7 global reviews</span>
-        </div>
+        <span data-hook="total-review-count">7 customer reviews</span>
       `;
 
       const result = extractPaginationInfo(html);
@@ -70,9 +69,7 @@ describe('Amazon pagination', () => {
 
     it('handles exactly 10 reviews (one full page)', () => {
       const html = `
-        <div data-hook="cr-filter-info-review-rating-count">
-          <span>25 global ratings | 10 global reviews</span>
-        </div>
+        <span data-hook="total-review-count">10 customer reviews</span>
       `;
 
       const result = extractPaginationInfo(html);
@@ -83,9 +80,7 @@ describe('Amazon pagination', () => {
 
     it('handles exactly 11 reviews (requires 2 pages)', () => {
       const html = `
-        <div data-hook="cr-filter-info-review-rating-count">
-          <span>30 global ratings | 11 global reviews</span>
-        </div>
+        <span data-hook="total-review-count">11 customer reviews</span>
       `;
 
       const result = extractPaginationInfo(html);
@@ -96,9 +91,7 @@ describe('Amazon pagination', () => {
 
     it('handles zero reviews', () => {
       const html = `
-        <div data-hook="cr-filter-info-review-rating-count">
-          <span>0 global ratings | 0 global reviews</span>
-        </div>
+        <span data-hook="total-review-count">0 customer reviews</span>
       `;
 
       const result = extractPaginationInfo(html);
@@ -122,9 +115,7 @@ describe('Amazon pagination', () => {
 
     it('handles reviews with commas in large numbers', () => {
       const html = `
-        <div data-hook="cr-filter-info-review-rating-count">
-          <span>125,456 global ratings | 23,567 global reviews</span>
-        </div>
+        <span data-hook="total-review-count">23,567 customer reviews</span>
       `;
 
       const result = extractPaginationInfo(html);
@@ -133,16 +124,16 @@ describe('Amazon pagination', () => {
       expect(result.totalPages).toBe(2357);
     });
 
-    it('handles alternative review count text formats', () => {
+    it('returns zero when data-hook attribute is not found', () => {
       const html = `
-        <div data-hook="cr-filter-info-review-rating-count">
-          <span>Showing 1-10 of 156 reviews</span>
-        </div>
+        <p>Some other content without the specific data-hook</p>
+        <span>30,230 ratings</span>
       `;
 
       const result = extractPaginationInfo(html);
 
-      expect(result.totalReviews).toBeGreaterThanOrEqual(0);
+      expect(result.totalReviews).toBe(0);
+      expect(result.totalPages).toBe(0);
     });
   });
 });

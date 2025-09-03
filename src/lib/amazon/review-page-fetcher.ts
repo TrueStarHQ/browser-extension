@@ -1,92 +1,197 @@
-export interface PageResult {
-  url: string;
-  html: string;
-  error?: Error;
+import type { AmazonReview } from '@truestarhq/shared-types';
+
+import { log } from '../../utils/logger';
+import { parseReviewsFromHtml } from './review-parser';
+
+const AMAZON_AJAX_DELIMITER = '&&&';
+const AMAZON_AJAX_APPEND_ACTION = 'append';
+const AMAZON_REVIEW_DATA_HOOK = 'data-hook="review"';
+const AMAZON_CSRF_HEADER = 'anti-csrftoken-a2z';
+
+type AmazonAjaxCommand = [string, string?, string?];
+
+interface AjaxFetchOptions {
+  productId: string;
+  pageNumber: number;
+  csrfToken: string;
+  sortBy?: 'recent' | 'helpful';
 }
 
-function isRetryableError(error: Error): boolean {
-  const message = error.message.toLowerCase();
-
-  if (
-    message.includes('429') || // Too Many Requests
-    message.includes('503') || // Service Unavailable
-    message.includes('502') || // Bad Gateway
-    message.includes('504') || // Gateway Timeout
-    message.includes('network') ||
-    message.includes('timeout')
+export class AmazonFetchError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode?: number,
+    public readonly productId?: string,
+    public readonly pageNumber?: number
   ) {
-    return true;
+    super(message);
+    this.name = 'AmazonFetchError';
   }
+}
 
-  if (
-    message.includes('404') || // Not Found
-    message.includes('403') || // Forbidden
-    message.includes('401') || // Unauthorized
-    message.includes('400') // Bad Request
+export class AmazonParseError extends Error {
+  constructor(
+    message: string,
+    public readonly responseText?: string
   ) {
-    return false;
+    super(message);
+    this.name = 'AmazonParseError';
   }
-
-  return true;
 }
 
-export async function fetchReviewPage(url: string): Promise<string> {
-  let lastError: Error;
-  const maxRetries = 3;
+/**
+ * Fetches reviews using Amazon's AJAX endpoints
+ * These endpoints require proper session cookies to work
+ */
+export async function fetchReviewPage(
+  productId: string,
+  pageNumber: number,
+  csrfToken: string
+): Promise<AmazonReview[]> {
+  const options: AjaxFetchOptions = {
+    productId,
+    pageNumber,
+    csrfToken,
+    sortBy: 'recent',
+  };
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch page: ${response.status} ${response.statusText}`
-        );
-      }
-
-      return response.text();
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-
-      if (!isRetryableError(lastError)) {
-        throw lastError;
-      }
-
-      if (attempt === maxRetries) {
-        throw lastError;
-      }
-
-      const delay = (attempt + 1) * 1000;
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-  }
-
-  throw lastError!;
-}
-
-export async function fetchMultiplePages(
-  urls: string[]
-): Promise<PageResult[]> {
-  const results: PageResult[] = [];
-
-  for (let i = 0; i < urls.length; i++) {
-    const url = urls[i]!;
-
-    try {
-      const html = await fetchReviewPage(url);
-      results.push({ url, html });
-    } catch (error) {
-      results.push({
-        url,
-        html: '',
-        error: error instanceof Error ? error : new Error(String(error)),
+  try {
+    const response = await makeAjaxRequest(options);
+    const responseText = await response.text();
+    return parseResponse(responseText);
+  } catch (error) {
+    if (error instanceof AmazonFetchError) {
+      log.error('Amazon fetch error:', {
+        message: error.message,
+        statusCode: error.statusCode,
+        productId: error.productId,
+        pageNumber: error.pageNumber,
       });
+    } else if (error instanceof AmazonParseError) {
+      log.error('Amazon parse error:', {
+        message: error.message,
+        responsePreview: error.responseText?.substring(0, 200),
+      });
+    } else {
+      log.error('Unexpected error fetching reviews:', error);
     }
+    return [];
+  }
+}
 
-    if (i < urls.length - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
+/**
+ * Makes the AJAX request to Amazon's review endpoint
+ */
+async function makeAjaxRequest(options: AjaxFetchOptions): Promise<Response> {
+  const { productId, pageNumber, csrfToken, sortBy = 'recent' } = options;
+
+  const ajaxUrl = buildRequestUrl(pageNumber);
+
+  const formData = new URLSearchParams({
+    asin: productId,
+    pageNumber: pageNumber.toString(),
+    sortBy,
+  });
+
+  const response = await fetch(ajaxUrl, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      [AMAZON_CSRF_HEADER]: csrfToken,
+      'content-type': 'application/x-www-form-urlencoded',
+    },
+    body: formData.toString(),
+  });
+
+  if (!response.ok) {
+    throw new AmazonFetchError(
+      `Review page request failed: ${response.status} ${response.statusText}`,
+      response.status,
+      productId,
+      pageNumber
+    );
+  }
+
+  return response;
+}
+
+/**
+ * Builds the URL for fetching a page of reviews
+ */
+function buildRequestUrl(pageNumber: number): string {
+  return `https://www.amazon.com/hz/reviews-render/ajax/reviews/get/ref=cm_cr_getr_d_paging_btm_next_${pageNumber}`;
+}
+
+/**
+ * Parses Amazon's AJAX response format to extract review HTML
+ */
+function parseResponse(responseText: string): AmazonReview[] {
+  if (!responseText.includes(AMAZON_AJAX_DELIMITER)) {
+    return [];
+  }
+
+  const reviewHtml = extractReviewHtmlFromCommands(responseText);
+
+  if (!reviewHtml) {
+    return [];
+  }
+
+  return parseReviewsFromHtml(reviewHtml);
+}
+
+/**
+ * Extracts review HTML content from Amazon's command-based response format
+ */
+function extractReviewHtmlFromCommands(responseText: string): string {
+  const commands = responseText.split(AMAZON_AJAX_DELIMITER);
+  let reviewHtml = '';
+
+  for (const command of commands) {
+    const htmlContent = extractHtmlFromCommand(command);
+    if (htmlContent) {
+      reviewHtml += htmlContent;
     }
   }
 
-  return results;
+  return reviewHtml;
+}
+
+/**
+ * Extracts HTML content from a single Amazon AJAX command
+ */
+function extractHtmlFromCommand(commandString: string): string | null {
+  try {
+    const parsed = JSON.parse(commandString.trim()) as AmazonAjaxCommand;
+
+    if (!isAppendCommand(parsed)) {
+      return null;
+    }
+
+    const content = parsed[2] || parsed[1];
+
+    if (isReviewContent(content)) {
+      return content;
+    }
+
+    return null;
+  } catch {
+    // Skip unparseable commands
+    return null;
+  }
+}
+
+/**
+ * Checks if a command is an append action
+ */
+function isAppendCommand(command: unknown): command is AmazonAjaxCommand {
+  return Array.isArray(command) && command[0] === AMAZON_AJAX_APPEND_ACTION;
+}
+
+/**
+ * Checks if content contains review data
+ */
+function isReviewContent(content: unknown): content is string {
+  return (
+    typeof content === 'string' && content.includes(AMAZON_REVIEW_DATA_HOOK)
+  );
 }

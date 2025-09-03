@@ -1,86 +1,56 @@
 import { render } from '@testing-library/svelte';
+import type { CheckAmazonProductResponse } from '@truestarhq/shared-types';
 import { describe, expect, it, vi } from 'vitest';
 
 import AnalysisPanel from './AnalysisPanel.svelte';
+
+const createMockAnalysis = (
+  trustScore: number,
+  overrides: Partial<CheckAmazonProductResponse> = {}
+): CheckAmazonProductResponse => ({
+  timestamp: '2024-01-01T00:00:00Z',
+  summary: { trustScore },
+  metrics: { analyzed: 10, total: 20 },
+  ...overrides,
+});
 
 describe('AnalysisPanel', () => {
   it('renders the component', () => {
     const { container } = render(AnalysisPanel, {
       props: {
-        analysis: {
-          isFake: true,
-          confidence: 0.85,
-          summary: 'Test summary',
-          reasons: [],
-          flags: [],
-        },
+        analysis: createMockAnalysis(15),
       },
     });
 
     expect(container.querySelector('#truestar-panel')).toBeTruthy();
   });
 
-  it('displays fake review score correctly', () => {
+  it('displays default message when no error', () => {
     const { getByText } = render(AnalysisPanel, {
       props: {
-        analysis: {
-          isFake: true,
-          confidence: 0.85,
-          summary: 'Test summary',
-          reasons: [],
-          flags: [],
-        },
+        analysis: createMockAnalysis(85),
       },
     });
 
-    expect(getByText('85%')).toBeTruthy();
+    expect(getByText('Analysis complete')).toBeTruthy();
   });
 
-  it('displays confidence level', () => {
+  it('displays error message when provided', () => {
     const { getByText } = render(AnalysisPanel, {
       props: {
-        analysis: {
-          isFake: true,
-          confidence: 0.85,
-          summary: 'Test summary',
-          reasons: [],
-          flags: [],
-        },
+        analysis: createMockAnalysis(0),
+        errorMessage: 'Analysis service unavailable',
       },
     });
 
-    expect(getByText(/Confidence: 85%/)).toBeTruthy();
-  });
-
-  it('displays summary', () => {
-    const { getByText } = render(AnalysisPanel, {
-      props: {
-        analysis: {
-          isFake: true,
-          confidence: 0.85,
-          summary: 'This product has suspicious review patterns',
-          reasons: [],
-          flags: [],
-        },
-      },
-    });
-
-    expect(
-      getByText('This product has suspicious review patterns')
-    ).toBeTruthy();
+    expect(getByText('Analysis service unavailable')).toBeTruthy();
   });
 
   it('calls onClose when close button is clicked', () => {
     const onClose = vi.fn();
     const { getByRole } = render(AnalysisPanel, {
       props: {
-        analysis: {
-          isFake: true,
-          confidence: 0.85,
-          summary: 'Test summary',
-          reasons: [],
-          flags: [],
-        },
+        analysis: createMockAnalysis(50),
         onClose,
       },
     });
@@ -91,171 +61,21 @@ describe('AnalysisPanel', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  describe('Edge Cases', () => {
-    it('displays fallback text for null summary', () => {
-      const { getByText } = render(AnalysisPanel, {
-        props: {
-          analysis: {
-            isFake: false,
-            confidence: 0.5,
-            summary: null as any,
-            reasons: [],
-            flags: [],
-          },
-        },
-      });
-
-      expect(getByText('No analysis available')).toBeTruthy();
+  it('hides close button when onClose is not provided', () => {
+    const { queryByRole } = render(AnalysisPanel, {
+      props: {
+        analysis: createMockAnalysis(50),
+      },
     });
 
-    it('displays fallback text for undefined summary', () => {
-      const { getByText } = render(AnalysisPanel, {
-        props: {
-          analysis: {
-            isFake: false,
-            confidence: 0.5,
-            summary: undefined as any,
-            reasons: [],
-            flags: [],
-          },
-        },
-      });
-
-      expect(getByText('No analysis available')).toBeTruthy();
-    });
-
-    it('displays fallback text for empty summary', () => {
-      const { getByText } = render(AnalysisPanel, {
-        props: {
-          analysis: {
-            isFake: false,
-            confidence: 0.5,
-            summary: '',
-            reasons: [],
-            flags: [],
-          },
-        },
-      });
-
-      expect(getByText('No analysis available')).toBeTruthy();
-    });
-
-    it('hides red flags section when reasons is null', () => {
-      const { container } = render(AnalysisPanel, {
-        props: {
-          analysis: {
-            isFake: true,
-            confidence: 0.85,
-            summary: 'Test',
-            reasons: null as any,
-            flags: [],
-          },
-        },
-      });
-
-      expect(container.querySelector('details')).toBeFalsy();
-    });
-
-    it('hides red flags section when flags is null', () => {
-      const { container } = render(AnalysisPanel, {
-        props: {
-          analysis: {
-            isFake: true,
-            confidence: 0.85,
-            summary: 'Test',
-            reasons: [],
-            flags: null as any,
-          },
-        },
-      });
-
-      expect(container.querySelector('details')).toBeFalsy();
-    });
-
-    it('displays red flags when both arrays have items', () => {
-      const { getByText, getAllByRole } = render(AnalysisPanel, {
-        props: {
-          analysis: {
-            isFake: true,
-            confidence: 0.85,
-            summary: 'Test',
-            reasons: ['Reason 1', 'Reason 2'],
-            flags: ['Flag 1', 'Flag 2'],
-          },
-        },
-      });
-
-      expect(getByText('Red Flags (4)')).toBeTruthy();
-      const listItems = getAllByRole('listitem');
-      expect(listItems.length).toBe(4);
-    });
-
-    it('displays 100% real score for 0 confidence fake', () => {
-      const { getByText } = render(AnalysisPanel, {
-        props: {
-          analysis: {
-            isFake: false,
-            confidence: 0,
-            summary: 'Test',
-            reasons: [],
-            flags: [],
-          },
-        },
-      });
-
-      expect(getByText('100%')).toBeTruthy();
-      expect(getByText('Confidence: 0%')).toBeTruthy();
-    });
-
-    it('displays 100% fake score for confidence of 1', () => {
-      const { getByText } = render(AnalysisPanel, {
-        props: {
-          analysis: {
-            isFake: true,
-            confidence: 1,
-            summary: 'Test',
-            reasons: [],
-            flags: [],
-          },
-        },
-      });
-
-      expect(getByText('100%')).toBeTruthy();
-      expect(getByText('Confidence: 100%')).toBeTruthy();
-    });
-
-    it('hides close button when onClose is not provided', () => {
-      const { queryByRole } = render(AnalysisPanel, {
-        props: {
-          analysis: {
-            isFake: false,
-            confidence: 0.5,
-            summary: 'Test',
-            reasons: [],
-            flags: [],
-          },
-        },
-      });
-
-      const closeButton = queryByRole('button', { name: /close/i });
-      expect(closeButton).toBeFalsy();
-    });
-
-    it('renders all items including empty strings', () => {
-      const { getAllByRole } = render(AnalysisPanel, {
-        props: {
-          analysis: {
-            isFake: true,
-            confidence: 0.85,
-            summary: 'Test',
-            reasons: ['Valid reason', '', 'Another reason'],
-            flags: ['', 'Valid flag', ''],
-          },
-        },
-      });
-
-      const listItems = getAllByRole('listitem');
-      expect(listItems.length).toBe(6);
-    });
+    const closeButton = queryByRole('button', { name: /close/i });
+    expect(closeButton).toBeFalsy();
   });
+
+  // TODO: Add more comprehensive tests once the UI design is finalized
+  // These will include:
+  // - Trust score display and color coding
+  // - Review metrics visualization
+  // - Flag/issue display
+  // - Interactive elements
 });
